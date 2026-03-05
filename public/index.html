@@ -395,12 +395,12 @@ body::after{
     <div id="modeSelect">
       <p style="margin-bottom:4px;">Scegli il tipo di torneo:</p>
       <button class="mode-btn" id="modeKills">
-        <span class="mode-title">💀 TORNEO KILL</span>
-        <span class="mode-desc">Vince chi totalizza più kill in 10 minuti</span>
+        <span class="mode-title">💀 TORNEO SURVIVAL</span>
+        <span class="mode-desc">Nessun respawn — vince l'ultimo serpente rimasto vivo</span>
       </button>
       <button class="mode-btn" id="modeLength">
         <span class="mode-title">📏 TORNEO LUNGHEZZA</span>
-        <span class="mode-desc">Vince il serpente più lungo raggiunto in 10 minuti</span>
+        <span class="mode-desc">Respawn attivo — vince il serpente più lungo in 10 minuti</span>
       </button>
       <button class="tbtn tbtn-cancel" id="tModeBack" style="width:100%;margin-top:4px;">← INDIETRO</button>
     </div>
@@ -538,7 +538,7 @@ document.getElementById('tModeBack').addEventListener('click', () => {
   stepCode.style.display = 'flex';
 });
 
-document.getElementById('modeKills').addEventListener('click', () => startTournament('kills'));
+document.getElementById('modeKills').addEventListener('click', () => startTournament('survival'));
 document.getElementById('modeLength').addEventListener('click', () => startTournament('length'));
 
 function startTournament(mode) {
@@ -568,7 +568,7 @@ let lobbyTimerInterval = null;
 
 function showTournamentLobby(info) {
   lobbyOverlay.classList.add('open');
-  const modeLabel = info.mode === 'kills' ? '💀 TORNEO KILL' : '📏 TORNEO LUNGHEZZA';
+  const modeLabel = info.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
   document.getElementById('tlobbyMode').textContent = 'MODALITÀ: ' + modeLabel;
 
   if (lobbyTimerInterval) clearInterval(lobbyTimerInterval);
@@ -598,8 +598,8 @@ function showWinner(winnerName, winnerColor, mode) {
   nameEl.textContent = (winnerName || '???').toUpperCase();
   nameEl.style.color = winnerColor || '#ffdd00';
   const subEl = document.getElementById('winnerSub');
-  subEl.textContent = mode === 'kills'
-    ? 'ha eliminato più nemici di tutti! 💀'
+  subEl.textContent = mode === 'survival'
+    ? 'è l\'ultimo sopravvissuto! 💀'
     : 'era il serpente più lungo di tutti! 📏';
   overlay.classList.add('open');
 
@@ -720,7 +720,7 @@ function joinGame() {
       const thud = document.getElementById('tournamentHUD');
       thud.style.display = 'block';
       document.getElementById('tHudMode').textContent =
-        msg.mode === 'kills' ? '💀 MODALITÀ KILL' : '📏 MODALITÀ LUNGHEZZA';
+        msg.mode === 'survival' ? '💀 MODALITÀ SURVIVAL' : '📏 MODALITÀ LUNGHEZZA';
     }
 
     if (msg.type === 'tournament_end') {
@@ -794,11 +794,20 @@ function updateCamera(me) {
 // ──────────────────────────────────────────────────────────────
 function updateTournamentHUD() {
   if (tournamentInfo.phase !== 'active') return;
-  const remaining = Math.max(0, tournamentInfo.gameEndsAt - Date.now());
-  const m = Math.floor(remaining / 60000);
-  const s = Math.floor((remaining % 60000) / 1000);
-  document.getElementById('tHudTime').textContent =
-    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  if (tournamentInfo.mode === 'survival') {
+    // Survival: nessun timer, mostra solo i vivi rimasti
+    if (gameState) {
+      const alive = gameState.players.filter(p => p.alive).length;
+      document.getElementById('tHudTime').textContent = alive + ' VIVI';
+    }
+  } else {
+    // Lunghezza: countdown 10 min
+    const remaining = Math.max(0, tournamentInfo.gameEndsAt - Date.now());
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('tHudTime').textContent =
+      String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -945,10 +954,14 @@ function loop(ts) {
   const deadTournamentMsg = document.getElementById('deadTournamentMsg');
   if (me && !me.alive) {
     dead.style.display = 'flex';
-    if (tournamentInfo.phase === 'active') {
+    if (tournamentInfo.phase === 'active' && tournamentInfo.mode === 'survival') {
       document.getElementById('deadTimer').textContent = 'SEI ELIMINATO!';
       deadTournamentMsg.style.display = 'block';
-      deadTournamentMsg.textContent = 'Nel torneo non c\'è respawn. Attendi la fine!';
+      deadTournamentMsg.textContent = 'Torneo Survival: nessun respawn. Attendi il vincitore!';
+    } else if (tournamentInfo.phase === 'active' && tournamentInfo.mode === 'length') {
+      const s = Math.max(0, Math.ceil((me.respawnAt - Date.now()) / 1000));
+      document.getElementById('deadTimer').textContent = `RESPAWN TRA ${s}s`;
+      deadTournamentMsg.style.display = 'none';
     } else {
       const s = Math.max(0, Math.ceil((me.respawnAt - Date.now()) / 1000));
       document.getElementById('deadTimer').textContent = `RESPAWN TRA ${s}s`;
@@ -962,14 +975,19 @@ function loop(ts) {
   const isTournament = tournamentInfo.phase === 'active';
   const boardTitle = document.getElementById('boardTitle');
   if (isTournament) {
-    boardTitle.textContent = tournamentInfo.mode === 'kills' ? '🏆 TORNEO KILL' : '🏆 TORNEO LUNGHEZZA';
+    boardTitle.textContent = tournamentInfo.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
   } else {
     boardTitle.textContent = '🏆 CLASSIFICA';
   }
 
   let sorted;
-  if (isTournament && tournamentInfo.mode === 'kills') {
-    sorted = [...gameState.players].sort((a,b) => (b.tournamentKills||0) - (a.tournamentKills||0)).slice(0,8);
+  if (isTournament && tournamentInfo.mode === 'survival') {
+    // Survival: mostra chi è ancora vivo in cima
+    sorted = [...gameState.players].sort((a,b) => {
+      if (a.alive && !b.alive) return -1;
+      if (!a.alive && b.alive) return 1;
+      return (b.kills||0) - (a.kills||0);
+    }).slice(0,8);
   } else if (isTournament && tournamentInfo.mode === 'length') {
     sorted = [...gameState.players].sort((a,b) => (b.tournamentMaxLength||0) - (a.tournamentMaxLength||0)).slice(0,8);
   } else {
@@ -978,7 +996,7 @@ function loop(ts) {
 
   document.getElementById('boardRows').innerHTML = sorted.map(p => {
     let stat;
-    if (isTournament && tournamentInfo.mode === 'kills') stat = `${p.tournamentKills||0}K`;
+    if (isTournament && tournamentInfo.mode === 'survival') stat = p.alive ? '✅ VIVO' : '💀 MORTO';
     else if (isTournament && tournamentInfo.mode === 'length') stat = `${p.tournamentMaxLength||3}L`;
     else stat = `${p.score||0}pt · ${p.kills||0}K`;
     return `
