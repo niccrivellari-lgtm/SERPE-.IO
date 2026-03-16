@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>🐍 Snake Arena</title>
+<title>🐍 SERPE.IO</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
 
@@ -359,8 +359,8 @@ body::after{
 
 <!-- LOBBY -->
 <div id="lobby">
-  <h1>🐍 SNAKE<br>ARENA</h1>
-  <p class="tagline">Battle Royale · Lobby Globale · Real-Time</p>
+  <h1>🐍 SERPE<br>.IO</h1>
+  <p class="tagline">Multiplayer Chaos · Lobby Globale · Real-Time</p>
   <div class="box">
     <label>NOME SERPENTE</label>
     <input id="nameInput" maxlength="16" placeholder="INSERISCI NOME" autocomplete="off"/>
@@ -528,7 +528,6 @@ function verifyCode() {
     setTimeout(() => { adminError.style.display = 'none'; }, 2000);
     return;
   }
-  // Code OK — show mode select
   stepCode.style.display = 'none';
   modeSelectDiv.style.display = 'flex';
 }
@@ -543,11 +542,9 @@ document.getElementById('modeLength').addEventListener('click', () => startTourn
 
 function startTournament(mode) {
   tournamentModal.classList.remove('open');
-  // Connect a temp WS or use existing
   if (ws && ws.readyState === 1) {
     ws.send(JSON.stringify({ type: 'admin_start_tournament', code: '479572', mode }));
   } else {
-    // Open a temp connection to send the admin command
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const tempWs = new WebSocket(`${proto}://${location.host}`);
     tempWs.onopen = () => {
@@ -578,9 +575,7 @@ function showTournamentLobby(info) {
     const s = Math.floor((remaining % 60000) / 1000);
     document.getElementById('tlobbyTimer').textContent =
       String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-    if (remaining <= 0) {
-      clearInterval(lobbyTimerInterval);
-    }
+    if (remaining <= 0) clearInterval(lobbyTimerInterval);
   }, 250);
 }
 
@@ -647,10 +642,7 @@ const DIR = {
 window.addEventListener('keydown', e => {
   if (!ws || ws.readyState !== 1 || !myId) return;
   const d = DIR[e.code];
-  if (d) {
-    e.preventDefault();
-    ws.send(JSON.stringify({ type:'dir', dir:d }));
-  }
+  if (d) { e.preventDefault(); ws.send(JSON.stringify({ type:'dir', dir:d })); }
 });
 
 let touchStart = null;
@@ -690,12 +682,9 @@ function joinGame() {
       document.getElementById('gameWrap').style.display = 'block';
       requestAnimationFrame(loop);
 
-      // Handle tournament state on join
       if (msg.tournament) {
         tournamentInfo = msg.tournament;
-        if (msg.tournament.phase === 'lobby') {
-          showTournamentLobby(msg.tournament);
-        }
+        if (msg.tournament.phase === 'lobby') showTournamentLobby(msg.tournament);
       }
     }
 
@@ -703,9 +692,7 @@ function joinGame() {
       detectKills(prevState, msg);
       prevState = gameState;
       gameState = msg;
-      if (msg.tournament) {
-        tournamentInfo = msg.tournament;
-      }
+      if (msg.tournament) tournamentInfo = msg.tournament;
     }
 
     if (msg.type === 'tournament_lobby') {
@@ -716,7 +703,6 @@ function joinGame() {
     if (msg.type === 'tournament_start') {
       tournamentInfo = { phase: 'active', mode: msg.mode, lobbyEndsAt: 0, gameEndsAt: msg.endsAt };
       hideTournamentLobby();
-      // Show game HUD
       const thud = document.getElementById('tournamentHUD');
       thud.style.display = 'block';
       document.getElementById('tHudMode').textContent =
@@ -755,9 +741,7 @@ function detectKills(prev, curr) {
       for (const cp2 of curr.players) {
         const pp2 = prev.players.find(p => p.id === cp2.id);
         if (!pp2) continue;
-        if (!cp2.alive && pp2.alive) {
-          addKillFeed(cp.name, cp.color, cp2.name, cp2.color);
-        }
+        if (!cp2.alive && pp2.alive) addKillFeed(cp.name, cp.color, cp2.name, cp2.color);
       }
     }
   }
@@ -795,13 +779,11 @@ function updateCamera(me) {
 function updateTournamentHUD() {
   if (tournamentInfo.phase !== 'active') return;
   if (tournamentInfo.mode === 'survival') {
-    // Survival: nessun timer, mostra solo i vivi rimasti
     if (gameState) {
       const alive = gameState.players.filter(p => p.alive).length;
       document.getElementById('tHudTime').textContent = alive + ' VIVI';
     }
   } else {
-    // Lunghezza: countdown 10 min
     const remaining = Math.max(0, tournamentInfo.gameEndsAt - Date.now());
     const m = Math.floor(remaining / 60000);
     const s = Math.floor((remaining % 60000) / 1000);
@@ -971,7 +953,7 @@ function loop(ts) {
     dead.style.display = 'none';
   }
 
-  // Leaderboard — during tournament show tournament-relevant stat
+  // Leaderboard
   const isTournament = tournamentInfo.phase === 'active';
   const boardTitle = document.getElementById('boardTitle');
   if (isTournament) {
@@ -982,7 +964,6 @@ function loop(ts) {
 
   let sorted;
   if (isTournament && tournamentInfo.mode === 'survival') {
-    // Survival: mostra chi è ancora vivo in cima
     sorted = [...gameState.players].sort((a,b) => {
       if (a.alive && !b.alive) return -1;
       if (!a.alive && b.alive) return 1;
