@@ -8,80 +8,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --g:#00ff88;
-  --r:#ff4466;
-  --y:#ffdd00;
-  --bg:#070d0a;
-  --panel:rgba(0,255,136,0.06);
-  --border:rgba(0,255,136,0.2);
+  --g:#00ff88;--r:#ff4466;--y:#ffdd00;
+  --bg:#070d0a;--panel:rgba(0,255,136,0.06);--border:rgba(0,255,136,0.2);
 }
-
 body{
-  background:var(--bg);
-  color:var(--g);
-  font-family:'Share Tech Mono',monospace;
-  overflow:hidden;
-  height:100vh;width:100vw;
+  background:var(--bg);color:var(--g);font-family:'Share Tech Mono',monospace;
+  overflow:hidden;height:100vh;width:100vw;
   display:flex;align-items:center;justify-content:center;
 }
-
 body::after{
-  content:'';
-  position:fixed;inset:0;
+  content:'';position:fixed;inset:0;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,0.03) 0px,rgba(0,0,0,0.03) 1px,transparent 1px,transparent 3px);
   pointer-events:none;z-index:999;
 }
 
 /* ── LOBBY ── */
-#lobby{
-  display:flex;flex-direction:column;align-items:center;gap:24px;
-  position:relative;z-index:1;
-}
+#lobby{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;z-index:1;max-height:100vh;overflow-y:auto;}
 #lobby h1{
   font-family:'Press Start 2P',monospace;
-  font-size:clamp(1.4rem,4vw,2.8rem);
-  color:var(--g);
+  font-size:clamp(1.4rem,4vw,2.8rem);color:var(--g);
   text-shadow:0 0 20px var(--g),0 0 60px rgba(0,255,136,0.3);
-  letter-spacing:0.06em;
-  animation:glow 2s ease-in-out infinite;
-  text-align:center;
-  line-height:1.5;
+  letter-spacing:0.06em;animation:glow 2s ease-in-out infinite;
+  text-align:center;line-height:1.5;
 }
 @keyframes glow{
   0%,100%{text-shadow:0 0 20px var(--g),0 0 60px rgba(0,255,136,0.3)}
   50%{text-shadow:0 0 40px var(--g),0 0 100px rgba(0,255,136,0.5),0 0 180px rgba(0,255,136,0.15)}
 }
-.tagline{
-  font-size:0.7rem;letter-spacing:0.3em;
-  color:rgba(0,255,136,0.45);text-transform:uppercase;
-}
+.tagline{font-size:0.7rem;letter-spacing:0.3em;color:rgba(0,255,136,0.45);text-transform:uppercase;}
+
 .box{
-  background:var(--panel);
-  border:1px solid var(--border);
-  padding:32px 40px;
-  display:flex;flex-direction:column;gap:18px;align-items:center;
-  min-width:300px;
-  position:relative;
+  background:var(--panel);border:1px solid var(--border);
+  padding:28px 36px;display:flex;flex-direction:column;gap:16px;align-items:center;
+  min-width:300px;position:relative;
 }
-.box::before,.box::after{
-  content:'';position:absolute;width:12px;height:12px;
-  border-color:var(--g);border-style:solid;
-}
+.box::before,.box::after{content:'';position:absolute;width:12px;height:12px;border-color:var(--g);border-style:solid;}
 .box::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
 .box::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
 
 .box label{font-size:0.65rem;letter-spacing:0.22em;color:rgba(0,255,136,0.5);align-self:flex-start;}
 #nameInput{
-  width:100%;background:rgba(0,255,136,0.05);
-  border:1px solid var(--border);
+  width:100%;background:rgba(0,255,136,0.05);border:1px solid var(--border);
   color:var(--g);font-family:'Press Start 2P',monospace;font-size:0.85rem;
-  padding:10px 14px;outline:none;
-  transition:border-color 0.2s,box-shadow 0.2s;
+  padding:10px 14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;
   text-transform:uppercase;letter-spacing:0.1em;
 }
 #nameInput:focus{border-color:var(--g);box-shadow:0 0 14px rgba(0,255,136,0.25);}
+#nameError{color:var(--r);font-size:0.58rem;letter-spacing:0.1em;display:none;align-self:flex-start;}
+
 #joinBtn{
   width:100%;background:var(--g);color:#000;border:none;
   font-family:'Press Start 2P',monospace;font-size:0.75rem;
@@ -90,299 +65,241 @@ body::after{
 }
 #joinBtn:hover{box-shadow:0 0 24px rgba(0,255,136,0.5);transform:translateY(-2px);}
 #joinBtn:active{transform:translateY(1px);}
+#joinBtn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
 
-/* Tournament button in lobby */
 #tournamentBtn{
   width:100%;background:transparent;color:var(--y);
   border:1px solid rgba(255,221,0,0.4);
   font-family:'Press Start 2P',monospace;font-size:0.6rem;
   letter-spacing:0.08em;padding:10px;cursor:pointer;
-  transition:all 0.2s;text-transform:uppercase;margin-top:-6px;
+  transition:all 0.2s;text-transform:uppercase;
 }
 #tournamentBtn:hover{background:rgba(255,221,0,0.08);border-color:var(--y);box-shadow:0 0 18px rgba(255,221,0,0.3);}
 
-.ctrl{
-  display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;
-  font-size:0.6rem;color:rgba(0,255,136,0.4);letter-spacing:0.1em;
-}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:0.6rem;color:rgba(0,255,136,0.4);letter-spacing:0.1em;}
 .ctrl span{color:var(--g);}
 
-/* ── TOURNAMENT MODAL ── */
-#tournamentModal{
+/* ── TOURNAMENT COUNTDOWN (nella home) ── */
+#tournamentCountdownBox{
   display:none;
-  position:fixed;inset:0;z-index:2000;
-  background:rgba(7,13,10,0.92);
-  align-items:center;justify-content:center;
+  background:rgba(255,221,0,0.04);border:1px solid rgba(255,221,0,0.35);
+  padding:16px 24px;text-align:center;width:100%;
+  position:relative;
+}
+#tournamentCountdownBox::before,#tournamentCountdownBox::after{
+  content:'';position:absolute;width:10px;height:10px;border-color:var(--y);border-style:solid;
+}
+#tournamentCountdownBox::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+#tournamentCountdownBox::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+
+#tcb-label{font-size:0.55rem;color:rgba(255,221,0,0.55);letter-spacing:0.25em;text-transform:uppercase;margin-bottom:6px;}
+#tcb-mode{font-size:0.62rem;color:var(--y);letter-spacing:0.12em;margin-bottom:10px;}
+#tcb-date{font-size:0.6rem;color:rgba(255,221,0,0.7);letter-spacing:0.1em;margin-bottom:8px;}
+#tcb-timer{font-family:'Press Start 2P',monospace;font-size:1.3rem;color:var(--y);text-shadow:0 0 20px rgba(255,221,0,0.5);letter-spacing:0.08em;}
+#tcb-warning{font-size:0.55rem;color:rgba(255,100,100,0.7);letter-spacing:0.1em;margin-top:8px;display:none;}
+
+/* ── WINNER BOARD (nella home, post torneo 15 min) ── */
+#winnerBoardBox{
+  display:none;
+  background:rgba(255,221,0,0.03);border:1px solid rgba(255,221,0,0.5);
+  padding:16px 24px;text-align:center;width:100%;
+}
+#wbb-title{font-family:'Press Start 2P',monospace;font-size:0.65rem;color:var(--y);letter-spacing:0.12em;margin-bottom:12px;}
+#wbb-mode{font-size:0.55rem;color:rgba(255,221,0,0.5);letter-spacing:0.15em;margin-bottom:10px;}
+.wbb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,221,0,0.08);font-size:0.65rem;}
+.wbb-row:last-child{border:none;}
+.wbb-rank{font-family:'Press Start 2P',monospace;font-size:0.5rem;color:rgba(255,221,0,0.5);min-width:28px;}
+.wbb-rank.gold{color:#ffdd00;}
+.wbb-rank.silver{color:#aaaaaa;}
+.wbb-rank.bronze{color:#cc8844;}
+.wbb-name{flex:1;text-align:left;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wbb-stat{font-family:'Press Start 2P',monospace;font-size:0.45rem;color:rgba(255,221,0,0.6);}
+#wbb-expires{font-size:0.52rem;color:rgba(255,221,0,0.3);letter-spacing:0.1em;margin-top:10px;}
+
+/* ── TOURNAMENT ADMIN MODAL ── */
+#tournamentModal{
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(7,13,10,0.92);align-items:center;justify-content:center;
   backdrop-filter:blur(6px);
 }
 #tournamentModal.open{display:flex;}
-
 .tmodal-box{
-  background:#070d0a;
-  border:1px solid var(--y);
-  padding:40px;
-  display:flex;flex-direction:column;gap:20px;align-items:center;
-  min-width:340px;max-width:420px;width:90%;
-  position:relative;
+  background:#070d0a;border:1px solid var(--y);padding:36px;
+  display:flex;flex-direction:column;gap:18px;align-items:center;
+  min-width:340px;max-width:440px;width:90%;position:relative;
+  max-height:90vh;overflow-y:auto;
 }
-.tmodal-box::before,.tmodal-box::after{
-  content:'';position:absolute;width:14px;height:14px;
-  border-color:var(--y);border-style:solid;
-}
+.tmodal-box::before,.tmodal-box::after{content:'';position:absolute;width:14px;height:14px;border-color:var(--y);border-style:solid;}
 .tmodal-box::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
 .tmodal-box::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
-
-.tmodal-box h2{
-  font-family:'Press Start 2P',monospace;font-size:0.9rem;
-  color:var(--y);text-shadow:0 0 20px rgba(255,221,0,0.5);
-  letter-spacing:0.1em;text-align:center;
-}
-.tmodal-box p{
-  font-size:0.62rem;color:rgba(0,255,136,0.5);letter-spacing:0.12em;
-  text-align:center;line-height:1.8;
-}
+.tmodal-box h2{font-family:'Press Start 2P',monospace;font-size:0.85rem;color:var(--y);text-shadow:0 0 20px rgba(255,221,0,0.5);letter-spacing:0.1em;text-align:center;}
+.tmodal-box p{font-size:0.6rem;color:rgba(0,255,136,0.5);letter-spacing:0.1em;text-align:center;line-height:1.8;}
 .tinput{
-  width:100%;background:rgba(255,221,0,0.05);
-  border:1px solid rgba(255,221,0,0.3);
+  width:100%;background:rgba(255,221,0,0.05);border:1px solid rgba(255,221,0,0.3);
   color:var(--y);font-family:'Press Start 2P',monospace;font-size:1.1rem;
   padding:12px;outline:none;text-align:center;letter-spacing:0.4em;
 }
 .tinput:focus{border-color:var(--y);box-shadow:0 0 14px rgba(255,221,0,0.2);}
-
 .tmodal-btns{display:flex;gap:12px;width:100%;}
-.tbtn{
-  flex:1;padding:12px;border:none;cursor:pointer;
-  font-family:'Press Start 2P',monospace;font-size:0.6rem;
-  letter-spacing:0.1em;text-transform:uppercase;
-  transition:all 0.2s;
-}
+.tbtn{flex:1;padding:12px;border:none;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.2s;}
 .tbtn-cancel{background:transparent;color:rgba(0,255,136,0.4);border:1px solid rgba(0,255,136,0.15);}
 .tbtn-cancel:hover{border-color:var(--g);color:var(--g);}
 .tbtn-confirm{background:var(--y);color:#000;}
 .tbtn-confirm:hover{box-shadow:0 0 20px rgba(255,221,0,0.4);transform:translateY(-1px);}
-.tbtn-confirm:active{transform:translateY(0);}
+#adminError{color:var(--r);font-size:0.6rem;letter-spacing:0.1em;display:none;text-align:center;}
 
-/* Mode selection */
-#modeSelect{display:none;flex-direction:column;gap:14px;width:100%;}
+/* Step 2: form data/ora/modalità */
+#scheduleForm{display:none;flex-direction:column;gap:14px;width:100%;}
+.sform-label{font-size:0.55rem;color:rgba(0,255,136,0.5);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;}
+.sform-input{
+  width:100%;background:rgba(0,255,136,0.05);border:1px solid var(--border);
+  color:var(--g);font-family:'Share Tech Mono',monospace;font-size:0.9rem;
+  padding:10px;outline:none;
+}
+.sform-input:focus{border-color:var(--g);}
+#modeSelect{display:flex;gap:10px;width:100%;}
 .mode-btn{
-  width:100%;padding:16px;border:1px solid var(--border);
-  background:var(--panel);color:var(--g);
-  font-family:'Press Start 2P',monospace;font-size:0.62rem;
-  letter-spacing:0.08em;text-transform:uppercase;
-  cursor:pointer;transition:all 0.2s;text-align:left;
+  flex:1;padding:14px 8px;border:1px solid var(--border);background:var(--panel);color:var(--g);
+  font-family:'Press Start 2P',monospace;font-size:0.52rem;letter-spacing:0.06em;text-transform:uppercase;
+  cursor:pointer;transition:all 0.2s;text-align:center;
 }
-.mode-btn:hover{border-color:var(--g);background:rgba(0,255,136,0.1);box-shadow:0 0 18px rgba(0,255,136,0.2);}
-.mode-btn .mode-title{color:var(--y);display:block;margin-bottom:6px;font-size:0.7rem;}
-.mode-btn .mode-desc{color:rgba(0,255,136,0.45);font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;}
+.mode-btn:hover,.mode-btn.selected{border-color:var(--y);background:rgba(255,221,0,0.08);color:var(--y);}
+.mode-btn .mode-title{display:block;font-size:0.58rem;margin-bottom:4px;}
+.mode-btn .mode-desc{color:rgba(0,255,136,0.4);font-family:'Share Tech Mono',monospace;font-size:0.58rem;display:block;}
+#scheduleError{color:var(--r);font-size:0.58rem;letter-spacing:0.1em;display:none;text-align:center;}
 
-#adminError{
-  color:var(--r);font-size:0.62rem;letter-spacing:0.1em;
-  display:none;text-align:center;
-}
+/* Step 3: conferma/cancella torneo esistente */
+#cancelForm{display:none;flex-direction:column;gap:14px;width:100%;align-items:center;}
+#cancelInfo{font-size:0.62rem;color:rgba(255,221,0,0.7);letter-spacing:0.1em;text-align:center;line-height:1.8;}
+#cancelBtn{width:100%;padding:12px;border:1px solid rgba(255,68,102,0.5);background:transparent;color:var(--r);font-family:'Press Start 2P',monospace;font-size:0.58rem;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+#cancelBtn:hover{background:rgba(255,68,102,0.1);border-color:var(--r);}
 
-/* ── TOURNAMENT LOBBY OVERLAY ── */
-#tournamentLobbyOverlay{
-  display:none;
-  position:fixed;inset:0;z-index:1500;
-  background:rgba(7,13,10,0.95);
-  align-items:center;justify-content:center;flex-direction:column;gap:28px;
-  backdrop-filter:blur(8px);
+/* ── EXPULSION SCREEN ── */
+#expulsionScreen{
+  display:none;position:fixed;inset:0;z-index:5000;
+  background:rgba(7,13,10,0.98);align-items:center;justify-content:center;flex-direction:column;gap:24px;
+  backdrop-filter:blur(10px);
 }
-#tournamentLobbyOverlay.open{display:flex;}
-
-.tlobby-title{
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(1.2rem,3.5vw,2.2rem);
-  color:var(--y);
-  text-shadow:0 0 30px rgba(255,221,0,0.6);
-  text-align:center;line-height:1.6;
-  animation:yellowglow 2s ease-in-out infinite;
-}
-@keyframes yellowglow{
-  0%,100%{text-shadow:0 0 20px rgba(255,221,0,0.5)}
-  50%{text-shadow:0 0 50px rgba(255,221,0,0.9),0 0 100px rgba(255,221,0,0.3)}
-}
-.tlobby-mode{
-  font-family:'Press Start 2P',monospace;font-size:0.8rem;
-  color:var(--g);letter-spacing:0.15em;text-align:center;
-  background:rgba(0,255,136,0.06);border:1px solid var(--border);
-  padding:12px 24px;
-}
-.tlobby-timer{
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(2rem,6vw,4rem);
-  color:#fff;
-  text-shadow:0 0 40px rgba(255,255,255,0.4);
-  letter-spacing:0.1em;
-}
-.tlobby-sub{
-  font-size:0.65rem;color:rgba(0,255,136,0.45);
-  letter-spacing:0.25em;text-transform:uppercase;text-align:center;
-}
-.tlobby-waiting{
-  font-size:0.7rem;color:rgba(0,255,136,0.35);
-  letter-spacing:0.2em;text-align:center;
-}
+#expulsionScreen.open{display:flex;}
+.exp-icon{font-size:3rem;animation:shake 0.5s ease-in-out infinite alternate;}
+@keyframes shake{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.exp-title{font-family:'Press Start 2P',monospace;font-size:clamp(1rem,3vw,1.8rem);color:var(--y);text-align:center;line-height:1.8;text-shadow:0 0 30px rgba(255,221,0,0.5);}
+.exp-sub{font-size:0.65rem;color:rgba(0,255,136,0.5);letter-spacing:0.2em;text-align:center;}
+.exp-date{font-family:'Press Start 2P',monospace;font-size:0.8rem;color:var(--g);letter-spacing:0.1em;text-align:center;padding:12px 24px;border:1px solid var(--border);background:var(--panel);}
+.exp-timer-label{font-size:0.55rem;color:rgba(255,221,0,0.5);letter-spacing:0.25em;text-transform:uppercase;}
+.exp-timer{font-family:'Press Start 2P',monospace;font-size:clamp(1.8rem,5vw,3.5rem);color:var(--y);text-shadow:0 0 40px rgba(255,221,0,0.6);letter-spacing:0.1em;}
+.exp-dismiss{font-size:0.6rem;color:rgba(0,255,136,0.3);letter-spacing:0.2em;margin-top:10px;}
 
 /* ── GAME ── */
 #gameWrap{display:none;position:relative;width:100vw;height:100vh;overflow:hidden;}
 #gameCanvas{display:block;}
-
-#hud{
-  position:absolute;top:0;left:0;right:0;
-  display:flex;justify-content:space-between;align-items:flex-start;
-  padding:10px 14px;pointer-events:none;gap:10px;
-}
-.hpanel{
-  background:var(--panel);border:1px solid var(--border);
-  padding:8px 14px;font-size:0.65rem;letter-spacing:0.15em;
-}
-.hpanel .val{
-  font-family:'Press Start 2P',monospace;font-size:0.9rem;
-  color:var(--g);margin-top:4px;
-}
+#hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 14px;pointer-events:none;gap:10px;}
+.hpanel{background:var(--panel);border:1px solid var(--border);padding:8px 14px;font-size:0.65rem;letter-spacing:0.15em;}
+.hpanel .val{font-family:'Press Start 2P',monospace;font-size:0.9rem;color:var(--g);margin-top:4px;}
 .lbl{color:rgba(0,255,136,0.45);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;}
-
-/* Tournament timer HUD */
 #tournamentHUD{
-  display:none;
-  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
   background:rgba(7,13,10,0.9);border:1px solid var(--y);
-  padding:8px 20px;text-align:center;pointer-events:none;
-  z-index:10;
+  padding:8px 20px;text-align:center;pointer-events:none;z-index:10;
 }
 #tournamentHUD .t-label{font-size:0.55rem;color:rgba(255,221,0,0.6);letter-spacing:0.2em;}
 #tournamentHUD .t-time{font-family:'Press Start 2P',monospace;font-size:1rem;color:var(--y);margin-top:2px;}
 #tournamentHUD .t-mode{font-size:0.55rem;color:rgba(255,221,0,0.4);margin-top:2px;letter-spacing:0.15em;}
-
-#board{
-  position:absolute;top:10px;right:14px;
-  background:var(--panel);border:1px solid var(--border);
-  padding:10px 14px;min-width:190px;pointer-events:none;
-}
+#board{position:absolute;top:10px;right:14px;background:var(--panel);border:1px solid var(--border);padding:10px 14px;min-width:190px;pointer-events:none;}
 #board h3{font-family:'Press Start 2P',monospace;font-size:0.5rem;letter-spacing:0.15em;color:rgba(0,255,136,0.45);margin-bottom:8px;}
 .brow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(0,255,136,0.07);font-size:0.68rem;}
 .brow:last-child{border:none;}
 .bname{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .bscore{font-family:'Press Start 2P',monospace;font-size:0.55rem;color:var(--y);}
 .bme{color:#fff!important;}
-
-#deadOverlay{
-  display:none;position:absolute;inset:0;
-  background:rgba(7,13,10,0.82);
-  align-items:center;justify-content:center;flex-direction:column;gap:14px;
-  backdrop-filter:blur(3px);
-}
-#deadOverlay h2{
-  font-family:'Press Start 2P',monospace;font-size:clamp(1.4rem,4vw,2.5rem);
-  color:var(--r);text-shadow:0 0 30px var(--r);
-  animation:blink 0.5s step-end infinite;
-}
+#deadOverlay{display:none;position:absolute;inset:0;background:rgba(7,13,10,0.82);align-items:center;justify-content:center;flex-direction:column;gap:14px;backdrop-filter:blur(3px);}
+#deadOverlay h2{font-family:'Press Start 2P',monospace;font-size:clamp(1.4rem,4vw,2.5rem);color:var(--r);text-shadow:0 0 30px var(--r);animation:blink 0.5s step-end infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 #deadOverlay p{font-size:0.7rem;color:rgba(0,255,136,0.6);letter-spacing:0.15em;}
-#deadOverlay .tournament-dead-msg{
-  font-size:0.62rem;color:rgba(255,221,0,0.6);letter-spacing:0.1em;
-  text-align:center;max-width:280px;margin-top:4px;
-}
-
-#minimap{
-  position:absolute;bottom:14px;left:14px;
-  border:1px solid var(--border);background:rgba(7,13,10,0.8);
-  pointer-events:none;image-rendering:pixelated;
-}
-
-#killfeed{
-  position:absolute;bottom:14px;right:14px;
-  display:flex;flex-direction:column;gap:4px;
-  pointer-events:none;align-items:flex-end;
-}
-.kfitem{
-  background:rgba(7,13,10,0.85);border-left:2px solid var(--r);
-  padding:4px 10px;font-size:0.62rem;letter-spacing:0.1em;
-  animation:fadeout 3s forwards;
-}
+.tournament-dead-msg{font-size:0.62rem;color:rgba(255,221,0,0.6);letter-spacing:0.1em;text-align:center;max-width:280px;margin-top:4px;}
+#minimap{position:absolute;bottom:14px;left:14px;border:1px solid var(--border);background:rgba(7,13,10,0.8);pointer-events:none;image-rendering:pixelated;}
+#killfeed{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;gap:4px;pointer-events:none;align-items:flex-end;}
+.kfitem{background:rgba(7,13,10,0.85);border-left:2px solid var(--r);padding:4px 10px;font-size:0.62rem;letter-spacing:0.1em;animation:fadeout 3s forwards;}
 @keyframes fadeout{0%,70%{opacity:1}100%{opacity:0}}
 
-/* ── TOURNAMENT WINNER OVERLAY ── */
-#winnerOverlay{
-  display:none;
-  position:fixed;inset:0;z-index:3000;
-  background:rgba(7,13,10,0.93);
-  align-items:center;justify-content:center;flex-direction:column;gap:24px;
-  backdrop-filter:blur(10px);
-}
+/* ── WINNER OVERLAY (in-game, fine torneo) ── */
+#winnerOverlay{display:none;position:fixed;inset:0;z-index:3000;background:rgba(7,13,10,0.93);align-items:center;justify-content:center;flex-direction:column;gap:20px;backdrop-filter:blur(10px);}
 #winnerOverlay.open{display:flex;}
+.winner-trophy{font-size:4rem;animation:bounce 0.6s ease-in-out infinite alternate;}
+@keyframes bounce{from{transform:scale(1) translateY(0)}to{transform:scale(1.1) translateY(-8px)}}
+.winner-title{font-family:'Press Start 2P',monospace;font-size:0.7rem;color:rgba(255,221,0,0.6);letter-spacing:0.3em;text-transform:uppercase;}
+.winner-name{font-family:'Press Start 2P',monospace;font-size:clamp(1.3rem,4vw,2.5rem);text-align:center;text-shadow:0 0 40px currentColor,0 0 80px currentColor;animation:winnerglow 1s ease-in-out infinite;}
+@keyframes winnerglow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+.winner-sub{font-size:0.62rem;color:rgba(255,221,0,0.5);letter-spacing:0.15em;text-align:center;}
+.winner-counter{font-family:'Press Start 2P',monospace;font-size:0.55rem;color:rgba(0,255,136,0.3);letter-spacing:0.15em;}
 
-.winner-trophy{font-size:5rem;animation:bounce 0.6s ease-in-out infinite alternate;}
-@keyframes bounce{from{transform:scale(1) translateY(0)}to{transform:scale(1.1) translateY(-10px)}}
+/* winner board in-game */
+#winnerBoardInGame{display:none;background:rgba(7,13,10,0.9);border:1px solid rgba(255,221,0,0.4);padding:14px 20px;min-width:220px;max-width:300px;}
+#wbig-title{font-family:'Press Start 2P',monospace;font-size:0.5rem;color:rgba(255,221,0,0.6);letter-spacing:0.15em;margin-bottom:10px;text-align:center;}
+.wbig-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,221,0,0.07);font-size:0.65rem;}
+.wbig-row:last-child{border:none;}
+.wbig-rank{font-family:'Press Start 2P',monospace;font-size:0.45rem;min-width:24px;color:rgba(255,221,0,0.4);}
 
-.winner-title{
-  font-family:'Press Start 2P',monospace;font-size:0.75rem;
-  color:rgba(255,221,0,0.6);letter-spacing:0.3em;text-transform:uppercase;
-}
-.winner-name{
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(1.5rem,5vw,3rem);
-  text-align:center;
-  text-shadow:0 0 40px currentColor, 0 0 80px currentColor;
-  animation:winnerglow 1s ease-in-out infinite;
-}
-@keyframes winnerglow{
-  0%,100%{filter:brightness(1)}
-  50%{filter:brightness(1.4)}
-}
-.winner-sub{
-  font-size:0.65rem;color:rgba(255,221,0,0.5);
-  letter-spacing:0.2em;text-align:center;
-}
-.winner-counter{
-  font-family:'Press Start 2P',monospace;font-size:0.6rem;
-  color:rgba(0,255,136,0.3);letter-spacing:0.2em;
-}
-
-/* confetti particles */
-.confetti-piece{
-  position:fixed;
-  width:8px;height:8px;
-  top:-10px;
-  animation:confetti-fall linear forwards;
-  pointer-events:none;
-  z-index:3001;
-}
-@keyframes confetti-fall{
-  0%{transform:translateY(0) rotate(0deg);opacity:1;}
-  100%{transform:translateY(110vh) rotate(720deg);opacity:0;}
-}
+.confetti-piece{position:fixed;width:8px;height:8px;top:-10px;animation:confetti-fall linear forwards;pointer-events:none;z-index:3001;}
+@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
 </style>
 </head>
 <body>
+
+<!-- EXPULSION SCREEN -->
+<div id="expulsionScreen">
+  <div class="exp-icon">⚠️</div>
+  <div class="exp-title">TORNEO IN<br>ARRIVO!</div>
+  <div class="exp-sub">SEI STATO ESPULSO DAL GIOCO</div>
+  <div class="exp-date" id="expDate">—</div>
+  <div class="exp-timer-label">IL TORNEO INIZIA TRA</div>
+  <div class="exp-timer" id="expTimer">30:00</div>
+  <div class="exp-dismiss">Torna alla home per vedere il countdown</div>
+</div>
 
 <!-- LOBBY -->
 <div id="lobby">
   <h1>🐍 SERPE<br>.IO</h1>
   <p class="tagline">Multiplayer Chaos · Lobby Globale · Real-Time</p>
+
+  <!-- TOURNAMENT COUNTDOWN (appare quando c'è un torneo programmato) -->
+  <div id="tournamentCountdownBox">
+    <div id="tcb-label">🏆 PROSSIMO TORNEO</div>
+    <div id="tcb-mode"></div>
+    <div id="tcb-date"></div>
+    <div id="tcb-timer">--:--:--</div>
+    <div id="tcb-warning">⚠ TORNEO IN CORSO — ACCESSO BLOCCATO</div>
+  </div>
+
+  <!-- WINNER BOARD (appare dopo il torneo, per 15 min) -->
+  <div id="winnerBoardBox">
+    <div id="wbb-title">🏆 CLASSIFICA FINALE</div>
+    <div id="wbb-mode"></div>
+    <div id="wbb-rows"></div>
+    <div id="wbb-expires"></div>
+  </div>
+
   <div class="box">
     <label>NOME SERPENTE</label>
     <input id="nameInput" maxlength="16" placeholder="INSERISCI NOME" autocomplete="off"/>
+    <div id="nameError">⚠ INSERISCI UN NOME PER GIOCARE</div>
     <button id="joinBtn">▶ ENTRA IN PARTITA</button>
-    <button id="tournamentBtn">🏆 CREA TORNEO</button>
+    <button id="tournamentBtn">🏆 GESTISCI TORNEO</button>
     <div class="ctrl">
-      <div><span>↑ W</span> — Su</div>
-      <div><span>↓ S</span> — Giù</div>
-      <div><span>← A</span> — Sinistra</div>
-      <div><span>→ D</span> — Destra</div>
+      <div><span>↑ W</span> — Su</div><div><span>↓ S</span> — Giù</div>
+      <div><span>← A</span> — Sinistra</div><div><span>→ D</span> — Destra</div>
     </div>
   </div>
 </div>
 
-<!-- TOURNAMENT MODAL -->
+<!-- TOURNAMENT ADMIN MODAL -->
 <div id="tournamentModal">
   <div class="tmodal-box">
-    <h2>🏆 TORNEO</h2>
+    <h2>🏆 TORNEO ADMIN</h2>
 
-    <!-- Step 1: codice admin -->
+    <!-- Step 1: pin -->
     <div id="step-code" style="width:100%;display:flex;flex-direction:column;gap:16px;align-items:center;">
-      <p>Inserisci il codice admin<br>per creare un torneo</p>
+      <p>Inserisci il codice admin</p>
       <input class="tinput" id="adminCode" type="password" maxlength="6" placeholder="• • • • • •" autocomplete="off"/>
       <div id="adminError">⚠ CODICE ERRATO</div>
       <div class="tmodal-btns">
@@ -391,83 +308,76 @@ body::after{
       </div>
     </div>
 
-    <!-- Step 2: scegli modalità -->
-    <div id="modeSelect">
-      <p style="margin-bottom:4px;">Scegli il tipo di torneo:</p>
-      <button class="mode-btn" id="modeKills">
-        <span class="mode-title">💀 TORNEO SURVIVAL</span>
-        <span class="mode-desc">Nessun respawn — vince l'ultimo serpente rimasto vivo</span>
-      </button>
-      <button class="mode-btn" id="modeLength">
-        <span class="mode-title">📏 TORNEO LUNGHEZZA</span>
-        <span class="mode-desc">Respawn attivo — vince il serpente più lungo in 10 minuti</span>
-      </button>
-      <button class="tbtn tbtn-cancel" id="tModeBack" style="width:100%;margin-top:4px;">← INDIETRO</button>
+    <!-- Step 2: programma torneo -->
+    <div id="scheduleForm">
+      <p>Scegli data, ora e modalità del torneo</p>
+      <div>
+        <div class="sform-label">DATA E ORA DI INIZIO</div>
+        <input class="sform-input" type="datetime-local" id="scheduleDateTime"/>
+      </div>
+      <div class="sform-label">MODALITÀ</div>
+      <div id="modeSelect">
+        <button class="mode-btn" id="modeKills" data-mode="survival">
+          <span class="mode-title">💀 SURVIVAL</span>
+          <span class="mode-desc">Ultimo vivo vince</span>
+        </button>
+        <button class="mode-btn" id="modeLength" data-mode="length">
+          <span class="mode-title">📏 LUNGHEZZA</span>
+          <span class="mode-desc">Più lungo in 10 min</span>
+        </button>
+      </div>
+      <div id="scheduleError">⚠ SELEZIONA DATA E MODALITÀ</div>
+      <div class="tmodal-btns">
+        <button class="tbtn tbtn-cancel" id="sFormBack">← INDIETRO</button>
+        <button class="tbtn tbtn-confirm" id="sFormConfirm">✓ PROGRAMMA</button>
+      </div>
+    </div>
+
+    <!-- Step 3: torneo già programmato → mostra info o cancella -->
+    <div id="cancelForm">
+      <div id="cancelInfo">Torneo programmato:<br><span id="cancelInfoDetail" style="color:var(--y)">—</span></div>
+      <button class="tbtn tbtn-confirm" id="tNewSchedule" style="width:100%;background:rgba(0,255,136,0.15);color:var(--g);border:1px solid var(--g);">+ NUOVO TORNEO</button>
+      <button id="cancelBtn">🗑 CANCELLA TORNEO</button>
+      <button class="tbtn tbtn-cancel" id="cancelModalClose" style="width:100%;">CHIUDI</button>
     </div>
   </div>
-</div>
-
-<!-- TOURNAMENT LOBBY OVERLAY (waiting screen) -->
-<div id="tournamentLobbyOverlay">
-  <div class="tlobby-title">🏆 TORNEO IN<br>ARRIVO!</div>
-  <div class="tlobby-mode" id="tlobbyMode">MODALITÀ: —</div>
-  <div class="tlobby-timer" id="tlobbyTimer">05:00</div>
-  <div class="tlobby-sub">LA PARTITA INIZIA TRA</div>
-  <div class="tlobby-waiting" id="tlobbyWaiting">In attesa dei giocatori...</div>
 </div>
 
 <!-- GAME -->
 <div id="gameWrap">
   <canvas id="gameCanvas"></canvas>
-
-  <!-- Tournament timer in-game -->
   <div id="tournamentHUD">
     <div class="t-label">TORNEO IN CORSO</div>
     <div class="t-time" id="tHudTime">10:00</div>
     <div class="t-mode" id="tHudMode"></div>
   </div>
-
   <div id="hud">
-    <div class="hpanel">
-      <div class="lbl">LUNGHEZZA</div>
-      <div class="val" id="lenNum">3</div>
-    </div>
-    <div class="hpanel" style="text-align:center">
-      <div class="lbl">PUNTEGGIO</div>
-      <div class="val" id="scoreNum">0</div>
-    </div>
-    <div class="hpanel" style="text-align:center">
-      <div class="lbl">KILLS</div>
-      <div class="val" id="killsNum">0</div>
-    </div>
-    <div class="hpanel" style="text-align:center">
-      <div class="lbl">ONLINE</div>
-      <div class="val" id="onlineNum">0</div>
-    </div>
+    <div class="hpanel"><div class="lbl">LUNGHEZZA</div><div class="val" id="lenNum">3</div></div>
+    <div class="hpanel" style="text-align:center"><div class="lbl">PUNTEGGIO</div><div class="val" id="scoreNum">0</div></div>
+    <div class="hpanel" style="text-align:center"><div class="lbl">KILLS</div><div class="val" id="killsNum">0</div></div>
+    <div class="hpanel" style="text-align:center"><div class="lbl">ONLINE</div><div class="val" id="onlineNum">0</div></div>
   </div>
-
-  <div id="board">
-    <h3 id="boardTitle">🏆 CLASSIFICA</h3>
-    <div id="boardRows"></div>
-  </div>
-
+  <div id="board"><h3 id="boardTitle">🏆 CLASSIFICA</h3><div id="boardRows"></div></div>
   <div id="deadOverlay">
     <h2>HAI PERSO!</h2>
     <p id="deadTimer">RESPAWN TRA 3s</p>
     <p class="tournament-dead-msg" id="deadTournamentMsg" style="display:none;"></p>
   </div>
-
   <canvas id="minimap" width="120" height="120"></canvas>
   <div id="killfeed"></div>
 </div>
 
-<!-- WINNER OVERLAY -->
+<!-- WINNER OVERLAY (in-game) -->
 <div id="winnerOverlay">
   <div class="winner-trophy">🏆</div>
   <div class="winner-title">VINCITORE DEL TORNEO</div>
   <div class="winner-name" id="winnerName">---</div>
   <div class="winner-sub" id="winnerSub">ha dominato il torneo!</div>
-  <div class="winner-counter" id="winnerCounter">ritorno al gioco normale tra 15s...</div>
+  <div id="winnerBoardInGame">
+    <div id="wbig-title">CLASSIFICA FINALE</div>
+    <div id="wbig-rows"></div>
+  </div>
+  <div class="winner-counter" id="winnerCounter">ritorno alla home tra 15s...</div>
 </div>
 
 <script>
@@ -476,10 +386,8 @@ body::after{
 // ──────────────────────────────────────────────────────────────
 let GRID = 40, CELL = 20;
 let myId = null, ws = null;
-let gameState = null;
-let prevState = null;
-let killFeedItems = [];
-let tournamentInfo = { phase: 'normal', mode: null, lobbyEndsAt: 0, gameEndsAt: 0 };
+let gameState = null, prevState = null;
+let tournamentInfo = { phase: 'normal', scheduledAt: 0, expulsionAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -495,26 +403,168 @@ resize();
 window.addEventListener('resize', resize);
 
 // ──────────────────────────────────────────────────────────────
-//  TOURNAMENT MODAL
+//  LOBBY TOURNAMENT COUNTDOWN
+// ──────────────────────────────────────────────────────────────
+let lobbyCountdownInterval = null;
+let wbbExpiresInterval = null;
+
+function updateLobbyCountdown() {
+  const box = document.getElementById('tournamentCountdownBox');
+  const wbb = document.getElementById('winnerBoardBox');
+  const joinBtn = document.getElementById('joinBtn');
+
+  // Winner board (post torneo, 15 min)
+  if (tournamentInfo.winnerBoard && tournamentInfo.winnerBoard.length > 0 && tournamentInfo.winnerBoardExpiresAt > Date.now()) {
+    renderWinnerBoard();
+    wbb.style.display = 'block';
+  } else {
+    wbb.style.display = 'none';
+  }
+
+  if (!tournamentInfo.scheduledAt || tournamentInfo.phase === 'normal') {
+    box.style.display = 'none';
+    joinBtn.disabled = false;
+    joinBtn.textContent = '▶ ENTRA IN PARTITA';
+    return;
+  }
+
+  box.style.display = 'block';
+
+  // Modalità
+  const modeLabel = tournamentInfo.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
+  document.getElementById('tcb-mode').textContent = modeLabel;
+
+  // Data formattata
+  const d = new Date(tournamentInfo.scheduledAt);
+  const giorni = ['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
+  const mesi = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC'];
+  document.getElementById('tcb-date').textContent =
+    `${giorni[d.getDay()]} ${d.getDate()} ${mesi[d.getMonth()]} — ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+  if (lobbyCountdownInterval) clearInterval(lobbyCountdownInterval);
+  lobbyCountdownInterval = setInterval(() => {
+    const now = Date.now();
+    const remaining = tournamentInfo.scheduledAt - now;
+
+    if (tournamentInfo.phase === 'active' || remaining <= 0) {
+      document.getElementById('tcb-timer').textContent = 'IN CORSO!';
+      document.getElementById('tcb-warning').style.display = 'block';
+      joinBtn.disabled = true;
+      joinBtn.textContent = '🔒 TORNEO IN CORSO';
+      clearInterval(lobbyCountdownInterval);
+      return;
+    }
+
+    if (tournamentInfo.phase === 'expelling') {
+      document.getElementById('tcb-warning').style.display = 'block';
+      joinBtn.disabled = true;
+      joinBtn.textContent = '🔒 TORNEO IN ARRIVO';
+    } else {
+      document.getElementById('tcb-warning').style.display = 'none';
+      joinBtn.disabled = false;
+      joinBtn.textContent = '▶ ENTRA IN PARTITA';
+    }
+
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    let timerStr;
+    if (h > 0) timerStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    else timerStr = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('tcb-timer').textContent = timerStr;
+  }, 500);
+}
+
+function renderWinnerBoard() {
+  const board = tournamentInfo.winnerBoard || [];
+  const modeLabel = tournamentInfo.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
+  document.getElementById('wbb-mode').textContent = modeLabel;
+  const rankLabels = ['🥇','🥈','🥉'];
+  const rankClasses = ['gold','silver','bronze'];
+  document.getElementById('wbb-rows').innerHTML = board.map((p, i) => `
+    <div class="wbb-row">
+      <span class="wbb-rank ${rankClasses[i] || ''}">${rankLabels[i] || `#${p.rank}`}</span>
+      <span class="wbb-name" style="color:${p.color}">${p.name.toUpperCase()}</span>
+      <span class="wbb-stat">${p.stat}</span>
+    </div>
+  `).join('');
+
+  if (wbbExpiresInterval) clearInterval(wbbExpiresInterval);
+  wbbExpiresInterval = setInterval(() => {
+    const rem = Math.max(0, tournamentInfo.winnerBoardExpiresAt - Date.now());
+    const m = Math.floor(rem / 60000);
+    const s = Math.floor((rem % 60000) / 1000);
+    document.getElementById('wbb-expires').textContent =
+      rem > 0 ? `Classifica visibile per ancora ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : '';
+    if (rem <= 0) {
+      clearInterval(wbbExpiresInterval);
+      document.getElementById('winnerBoardBox').style.display = 'none';
+    }
+  }, 1000);
+}
+
+// ──────────────────────────────────────────────────────────────
+//  EXPULSION SCREEN
+// ──────────────────────────────────────────────────────────────
+let expTimerInterval = null;
+
+function showExpulsionScreen(scheduledAt) {
+  const scr = document.getElementById('expulsionScreen');
+  scr.classList.add('open');
+
+  const d = new Date(scheduledAt);
+  const giorni = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+  const mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  document.getElementById('expDate').textContent =
+    `${giorni[d.getDay()]} ${d.getDate()} ${mesi[d.getMonth()]} — ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+  if (expTimerInterval) clearInterval(expTimerInterval);
+  expTimerInterval = setInterval(() => {
+    const rem = Math.max(0, scheduledAt - Date.now());
+    const h = Math.floor(rem / 3600000);
+    const m = Math.floor((rem % 3600000) / 60000);
+    const s = Math.floor((rem % 60000) / 1000);
+    let t;
+    if (h > 0) t = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    else t = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('expTimer').textContent = t;
+    if (rem <= 0) {
+      clearInterval(expTimerInterval);
+      document.getElementById('expTimer').textContent = '🏁 VIA!';
+      setTimeout(() => scr.classList.remove('open'), 3000);
+    }
+  }, 500);
+
+  // Dopo 5s mostra la home sotto (con countdown)
+  setTimeout(() => {
+    scr.classList.remove('open');
+    updateLobbyCountdown();
+  }, 8000);
+}
+
+// ──────────────────────────────────────────────────────────────
+//  ADMIN MODAL
 // ──────────────────────────────────────────────────────────────
 const tournamentModal = document.getElementById('tournamentModal');
 const adminCodeInput = document.getElementById('adminCode');
 const adminError = document.getElementById('adminError');
 const stepCode = document.getElementById('step-code');
-const modeSelectDiv = document.getElementById('modeSelect');
+const scheduleForm = document.getElementById('scheduleForm');
+const cancelForm = document.getElementById('cancelForm');
+
+let selectedMode = null;
 
 document.getElementById('tournamentBtn').addEventListener('click', () => {
   adminCodeInput.value = '';
   adminError.style.display = 'none';
   stepCode.style.display = 'flex';
-  modeSelectDiv.style.display = 'none';
+  scheduleForm.style.display = 'none';
+  cancelForm.style.display = 'none';
   tournamentModal.classList.add('open');
   setTimeout(() => adminCodeInput.focus(), 100);
 });
-
-document.getElementById('tModalClose').addEventListener('click', () => {
-  tournamentModal.classList.remove('open');
-});
+document.getElementById('tModalClose').addEventListener('click', () => tournamentModal.classList.remove('open'));
+document.getElementById('cancelModalClose').addEventListener('click', () => tournamentModal.classList.remove('open'));
 
 document.getElementById('tCodeConfirm').addEventListener('click', verifyCode);
 adminCodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyCode(); });
@@ -529,28 +579,115 @@ function verifyCode() {
     return;
   }
   stepCode.style.display = 'none';
-  modeSelectDiv.style.display = 'flex';
+  // Se c'è già un torneo programmato → mostra info/cancella
+  if (tournamentInfo.phase !== 'normal') {
+    showCancelForm();
+  } else {
+    showScheduleForm();
+  }
 }
 
-document.getElementById('tModeBack').addEventListener('click', () => {
-  modeSelectDiv.style.display = 'none';
+function showScheduleForm() {
+  scheduleForm.style.display = 'flex';
+  cancelForm.style.display = 'none';
+  // Imposta minimo datetime-local = adesso + 2 min
+  const minDt = new Date(Date.now() + 2 * 60 * 1000);
+  document.getElementById('scheduleDateTime').min = minDt.toISOString().slice(0,16);
+  selectedMode = null;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('scheduleError').style.display = 'none';
+}
+
+function showCancelForm() {
+  scheduleForm.style.display = 'none';
+  cancelForm.style.display = 'flex';
+  if (tournamentInfo.scheduledAt) {
+    const d = new Date(tournamentInfo.scheduledAt);
+    const modeLabel = tournamentInfo.mode === 'survival' ? 'SURVIVAL' : 'LUNGHEZZA';
+    document.getElementById('cancelInfoDetail').textContent =
+      `${modeLabel} — ${d.toLocaleString('it-IT')}`;
+  }
+}
+
+document.getElementById('sFormBack').addEventListener('click', () => {
+  scheduleForm.style.display = 'none';
   stepCode.style.display = 'flex';
+  adminCodeInput.value = '';
 });
 
-document.getElementById('modeKills').addEventListener('click', () => startTournament('survival'));
-document.getElementById('modeLength').addEventListener('click', () => startTournament('length'));
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMode = btn.dataset.mode;
+  });
+});
 
-function startTournament(mode) {
+document.getElementById('sFormConfirm').addEventListener('click', () => {
+  const dtVal = document.getElementById('scheduleDateTime').value;
+  const err = document.getElementById('scheduleError');
+  if (!dtVal || !selectedMode) {
+    err.style.display = 'block';
+    err.textContent = '⚠ SELEZIONA DATA E MODALITÀ';
+    return;
+  }
+  const scheduledAt = new Date(dtVal).getTime();
+  if (scheduledAt <= Date.now() + 60000) {
+    err.style.display = 'block';
+    err.textContent = '⚠ ORA TROPPO VICINA — MINIMO 1 MINUTO';
+    return;
+  }
+  err.style.display = 'none';
+  sendAdminSchedule(selectedMode, scheduledAt);
   tournamentModal.classList.remove('open');
+});
+
+document.getElementById('tNewSchedule').addEventListener('click', () => {
+  showScheduleForm();
+  cancelForm.style.display = 'none';
+});
+
+document.getElementById('cancelBtn').addEventListener('click', () => {
+  sendAdminCancel();
+  tournamentModal.classList.remove('open');
+});
+
+function sendAdminSchedule(mode, scheduledAt) {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({ type: 'admin_start_tournament', code: '479572', mode }));
+    ws.send(JSON.stringify({ type: 'admin_schedule_tournament', code: '479572', mode, scheduledAt }));
   } else {
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const tempWs = new WebSocket(`${proto}://${location.host}`);
     tempWs.onopen = () => {
       tempWs.send(JSON.stringify({ type: 'join', name: '_admin_' }));
       setTimeout(() => {
-        tempWs.send(JSON.stringify({ type: 'admin_start_tournament', code: '479572', mode }));
+        tempWs.send(JSON.stringify({ type: 'admin_schedule_tournament', code: '479572', mode, scheduledAt }));
+        setTimeout(() => tempWs.close(), 500);
+      }, 200);
+    };
+    tempWs.onmessage = e => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'admin_ok') {
+        tournamentInfo.phase = 'scheduled';
+        tournamentInfo.mode = mode;
+        tournamentInfo.scheduledAt = scheduledAt;
+        tournamentInfo.expulsionAt = scheduledAt - 30 * 60 * 1000;
+        updateLobbyCountdown();
+      }
+    };
+  }
+}
+
+function sendAdminCancel() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({ type: 'admin_cancel_tournament', code: '479572' }));
+  } else {
+    const tempWs = new WebSocket(`${proto}://${location.host}`);
+    tempWs.onopen = () => {
+      tempWs.send(JSON.stringify({ type: 'join', name: '_admin_' }));
+      setTimeout(() => {
+        tempWs.send(JSON.stringify({ type: 'admin_cancel_tournament', code: '479572' }));
         setTimeout(() => tempWs.close(), 500);
       }, 200);
     };
@@ -558,56 +695,40 @@ function startTournament(mode) {
 }
 
 // ──────────────────────────────────────────────────────────────
-//  TOURNAMENT LOBBY OVERLAY
+//  WINNER OVERLAY (in-game)
 // ──────────────────────────────────────────────────────────────
-const lobbyOverlay = document.getElementById('tournamentLobbyOverlay');
-let lobbyTimerInterval = null;
-
-function showTournamentLobby(info) {
-  lobbyOverlay.classList.add('open');
-  const modeLabel = info.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
-  document.getElementById('tlobbyMode').textContent = 'MODALITÀ: ' + modeLabel;
-
-  if (lobbyTimerInterval) clearInterval(lobbyTimerInterval);
-  lobbyTimerInterval = setInterval(() => {
-    const remaining = Math.max(0, info.lobbyEndsAt - Date.now());
-    const m = Math.floor(remaining / 60000);
-    const s = Math.floor((remaining % 60000) / 1000);
-    document.getElementById('tlobbyTimer').textContent =
-      String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-    if (remaining <= 0) clearInterval(lobbyTimerInterval);
-  }, 250);
-}
-
-function hideTournamentLobby() {
-  lobbyOverlay.classList.remove('open');
-  if (lobbyTimerInterval) clearInterval(lobbyTimerInterval);
-}
-
-// ──────────────────────────────────────────────────────────────
-//  WINNER OVERLAY
-// ──────────────────────────────────────────────────────────────
-function showWinner(winnerName, winnerColor, mode) {
+function showWinnerOverlay(msg) {
   const overlay = document.getElementById('winnerOverlay');
-  const nameEl = document.getElementById('winnerName');
-  nameEl.textContent = (winnerName || '???').toUpperCase();
-  nameEl.style.color = winnerColor || '#ffdd00';
-  const subEl = document.getElementById('winnerSub');
-  subEl.textContent = mode === 'survival'
-    ? 'è l\'ultimo sopravvissuto! 💀'
-    : 'era il serpente più lungo di tutti! 📏';
-  overlay.classList.add('open');
+  document.getElementById('winnerName').textContent = (msg.winnerName || '???').toUpperCase();
+  document.getElementById('winnerName').style.color = msg.winnerColor || '#ffdd00';
+  document.getElementById('winnerSub').textContent = msg.mode === 'survival'
+    ? 'è l\'ultimo sopravvissuto! 💀' : 'era il serpente più lungo! 📏';
 
+  // Winner board in overlay
+  if (msg.winnerBoard && msg.winnerBoard.length > 0) {
+    document.getElementById('winnerBoardInGame').style.display = 'block';
+    const rankLabels = ['🥇','🥈','🥉'];
+    document.getElementById('wbig-rows').innerHTML = msg.winnerBoard.map((p, i) => `
+      <div class="wbig-row">
+        <span class="wbig-rank">${rankLabels[i] || `#${p.rank}`}</span>
+        <span style="flex:1;text-align:left;padding:0 8px;color:${p.color};font-size:0.65rem;">${p.name.toUpperCase()}</span>
+        <span style="font-size:0.5rem;color:rgba(255,221,0,0.5);font-family:'Press Start 2P',monospace;">${p.stat}</span>
+      </div>`).join('');
+  }
+
+  overlay.classList.add('open');
   spawnConfetti();
 
   let countdown = 15;
   const counter = document.getElementById('winnerCounter');
   const t = setInterval(() => {
     countdown--;
-    counter.textContent = `ritorno al gioco normale tra ${countdown}s...`;
+    counter.textContent = `ritorno alla home tra ${countdown}s...`;
     if (countdown <= 0) {
       clearInterval(t);
       overlay.classList.remove('open');
+      // Torna alla home
+      if (ws) ws.close();
     }
   }, 1000);
 }
@@ -633,18 +754,16 @@ function spawnConfetti() {
 //  CONTROLS
 // ──────────────────────────────────────────────────────────────
 const DIR = {
-  ArrowUp:    {x:0,y:-1}, KeyW:    {x:0,y:-1},
-  ArrowDown:  {x:0,y:1},  KeyS:    {x:0,y:1},
-  ArrowLeft:  {x:-1,y:0}, KeyA:    {x:-1,y:0},
-  ArrowRight: {x:1,y:0},  KeyD:    {x:1,y:0},
+  ArrowUp:{x:0,y:-1}, KeyW:{x:0,y:-1},
+  ArrowDown:{x:0,y:1}, KeyS:{x:0,y:1},
+  ArrowLeft:{x:-1,y:0}, KeyA:{x:-1,y:0},
+  ArrowRight:{x:1,y:0}, KeyD:{x:1,y:0},
 };
-
 window.addEventListener('keydown', e => {
   if (!ws || ws.readyState !== 1 || !myId) return;
   const d = DIR[e.code];
   if (d) { e.preventDefault(); ws.send(JSON.stringify({ type:'dir', dir:d })); }
 });
-
 let touchStart = null;
 window.addEventListener('touchstart', e => { touchStart = e.touches[0]; }, {passive:true});
 window.addEventListener('touchend', e => {
@@ -665,7 +784,25 @@ document.getElementById('joinBtn').addEventListener('click', joinGame);
 document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') joinGame(); });
 
 function joinGame() {
-  const name = document.getElementById('nameInput').value.trim() || 'SERPENTE';
+  const name = document.getElementById('nameInput').value.trim();
+  const nameErr = document.getElementById('nameError');
+
+  if (!name) {
+    nameErr.style.display = 'block';
+    document.getElementById('nameInput').focus();
+    setTimeout(() => { nameErr.style.display = 'none'; }, 2500);
+    return;
+  }
+
+  if (tournamentInfo.phase === 'active') {
+    alert('⚠ Torneo in corso — non puoi entrare!');
+    return;
+  }
+  if (tournamentInfo.phase === 'expelling') {
+    alert('⚠ Il torneo sta per iniziare — accesso bloccato!');
+    return;
+  }
+
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   ws = new WebSocket(`${proto}://${location.host}`);
 
@@ -678,14 +815,16 @@ function joinGame() {
       myId = msg.id;
       GRID = msg.grid;
       CELL = Math.floor(Math.min(canvas.width, canvas.height) / GRID);
+      if (msg.tournament) tournamentInfo = msg.tournament;
       document.getElementById('lobby').style.display = 'none';
       document.getElementById('gameWrap').style.display = 'block';
       requestAnimationFrame(loop);
+    }
 
-      if (msg.tournament) {
-        tournamentInfo = msg.tournament;
-        if (msg.tournament.phase === 'lobby') showTournamentLobby(msg.tournament);
-      }
+    if (msg.type === 'join_rejected') {
+      ws.close();
+      if (msg.reason === 'no_name') alert('⚠ Inserisci un nome!');
+      else if (msg.reason === 'tournament_active') alert('🔒 Torneo in corso — accesso bloccato!');
     }
 
     if (msg.type === 'state') {
@@ -695,39 +834,78 @@ function joinGame() {
       if (msg.tournament) tournamentInfo = msg.tournament;
     }
 
-    if (msg.type === 'tournament_lobby') {
-      tournamentInfo = { phase: 'lobby', mode: msg.mode, lobbyEndsAt: msg.endsAt, gameEndsAt: 0 };
-      showTournamentLobby(tournamentInfo);
+    if (msg.type === 'tournament_scheduled') {
+      tournamentInfo = msg;
+      // Non influenza il gioco in corso
     }
 
-    if (msg.type === 'tournament_start') {
-      tournamentInfo = { phase: 'active', mode: msg.mode, lobbyEndsAt: 0, gameEndsAt: msg.endsAt };
-      hideTournamentLobby();
-      const thud = document.getElementById('tournamentHUD');
-      thud.style.display = 'block';
-      document.getElementById('tHudMode').textContent =
-        msg.mode === 'survival' ? '💀 MODALITÀ SURVIVAL' : '📏 MODALITÀ LUNGHEZZA';
+    if (msg.type === 'tournament_expulsion') {
+      // Il server sta per espellerci — il ws.onclose gestirà il ritorno alla home
+      tournamentInfo.scheduledAt = msg.scheduledAt;
+    }
+
+    if (msg.type === 'tournament_cancelled') {
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, expulsionAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+      updateLobbyCountdown();
     }
 
     if (msg.type === 'tournament_end') {
-      tournamentInfo = { phase: 'ended' };
+      tournamentInfo.phase = 'ended';
+      tournamentInfo.winnerBoard = msg.winnerBoard;
+      tournamentInfo.winnerBoardExpiresAt = msg.winnerBoardExpiresAt;
+      tournamentInfo.mode = msg.mode;
       document.getElementById('tournamentHUD').style.display = 'none';
-      showWinner(msg.winnerName, msg.winnerColor, msg.mode);
+      showWinnerOverlay(msg);
     }
 
     if (msg.type === 'tournament_reset') {
-      tournamentInfo = { phase: 'normal' };
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, expulsionAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
       document.getElementById('tournamentHUD').style.display = 'none';
     }
   };
 
-  ws.onclose = () => {
+  ws.onclose = e => {
     document.getElementById('gameWrap').style.display = 'none';
+    document.getElementById('winnerOverlay').classList.remove('open');
     document.getElementById('lobby').style.display = 'flex';
-    hideTournamentLobby();
     gameState = null; prevState = null; myId = null;
+
+    // Se la chiusura è dovuta a espulsione per torneo
+    if (e.reason === 'tournament_expulsion') {
+      showExpulsionScreen(tournamentInfo.scheduledAt || 0);
+    }
+
+    updateLobbyCountdown();
   };
 }
+
+// Avvia countdown anche se non connesso (se ricarichiamo la pagina)
+// Fetch stato torneo dal server via polling leggero all'apertura
+(function checkTournamentStatus() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const checkWs = new WebSocket(`${proto}://${location.host}`);
+  checkWs.onopen = () => checkWs.send(JSON.stringify({ type: 'join', name: '__check__' }));
+  checkWs.onmessage = e => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'join_rejected') {
+        // Torneo attivo
+        tournamentInfo.phase = 'active';
+        updateLobbyCountdown();
+        checkWs.close();
+        return;
+      }
+      if (msg.type === 'init' && msg.tournament) {
+        tournamentInfo = msg.tournament;
+        updateLobbyCountdown();
+        checkWs.close();
+      }
+    } catch {}
+  };
+  checkWs.onerror = () => {};
+  checkWs.onclose = () => {};
+  setTimeout(() => { try { checkWs.close(); } catch {} }, 3000);
+})();
 
 // ──────────────────────────────────────────────────────────────
 //  KILL FEED
@@ -736,17 +914,14 @@ function detectKills(prev, curr) {
   if (!prev) return;
   for (const cp of curr.players) {
     const pp = prev.players.find(p => p.id === cp.id);
-    if (!pp) continue;
-    if (cp.kills > pp.kills) {
-      for (const cp2 of curr.players) {
-        const pp2 = prev.players.find(p => p.id === cp2.id);
-        if (!pp2) continue;
-        if (!cp2.alive && pp2.alive) addKillFeed(cp.name, cp.color, cp2.name, cp2.color);
-      }
+    if (!pp || cp.kills <= pp.kills) continue;
+    for (const cp2 of curr.players) {
+      const pp2 = prev.players.find(p => p.id === cp2.id);
+      if (!pp2 || cp2.alive || !pp2.alive) continue;
+      addKillFeed(cp.name, cp.color, cp2.name, cp2.color);
     }
   }
 }
-
 function addKillFeed(killer, kColor, victim, vColor) {
   const feed = document.getElementById('killfeed');
   const el = document.createElement('div');
@@ -759,92 +934,74 @@ function addKillFeed(killer, kColor, victim, vColor) {
 // ──────────────────────────────────────────────────────────────
 //  CAMERA
 // ──────────────────────────────────────────────────────────────
-let camX = 0, camY = 0;
-let camTargetX = 0, camTargetY = 0;
-
+let camX = 0, camY = 0, camTargetX = 0, camTargetY = 0;
 function updateCamera(me) {
   if (!me || !me.body || !me.body[0]) return;
   const head = me.body[0];
-  const worldX = head.x * CELL + CELL/2;
-  const worldY = head.y * CELL + CELL/2;
-  camTargetX = worldX - canvas.width/2;
-  camTargetY = worldY - canvas.height/2;
+  camTargetX = head.x * CELL + CELL/2 - canvas.width/2;
+  camTargetY = head.y * CELL + CELL/2 - canvas.height/2;
   camX += (camTargetX - camX) * 0.15;
   camY += (camTargetY - camY) * 0.15;
 }
 
 // ──────────────────────────────────────────────────────────────
-//  TOURNAMENT HUD UPDATE
+//  TOURNAMENT HUD
 // ──────────────────────────────────────────────────────────────
 function updateTournamentHUD() {
-  if (tournamentInfo.phase !== 'active') return;
+  const thud = document.getElementById('tournamentHUD');
+  if (tournamentInfo.phase !== 'active') { thud.style.display = 'none'; return; }
+  thud.style.display = 'block';
+  document.getElementById('tHudMode').textContent =
+    tournamentInfo.mode === 'survival' ? '💀 SURVIVAL' : '📏 LUNGHEZZA';
   if (tournamentInfo.mode === 'survival') {
     if (gameState) {
       const alive = gameState.players.filter(p => p.alive).length;
       document.getElementById('tHudTime').textContent = alive + ' VIVI';
     }
   } else {
-    const remaining = Math.max(0, tournamentInfo.gameEndsAt - Date.now());
-    const m = Math.floor(remaining / 60000);
-    const s = Math.floor((remaining % 60000) / 1000);
-    document.getElementById('tHudTime').textContent =
-      String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    const rem = Math.max(0, tournamentInfo.gameEndsAt - Date.now());
+    const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
+    document.getElementById('tHudTime').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
 }
 
 // ──────────────────────────────────────────────────────────────
-//  DRAW
+//  DRAW LOOP
 // ──────────────────────────────────────────────────────────────
-function loop(ts) {
+function loop() {
   requestAnimationFrame(loop);
   if (!gameState) return;
-
   const me = gameState.players.find(p => p.id === myId);
   if (me) updateCamera(me);
   updateTournamentHUD();
 
-  const W = GRID * CELL;
-  const H = GRID * CELL;
-
+  const W = GRID * CELL, H = GRID * CELL;
   ctx.fillStyle = '#070d0a';
   ctx.fillRect(0,0,canvas.width,canvas.height);
-
   ctx.save();
   ctx.translate(-camX, -camY);
 
   // Grid
   ctx.strokeStyle = 'rgba(0,255,136,0.05)';
   ctx.lineWidth = 1;
-  for (let x = 0; x <= GRID; x++) {
-    ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,H); ctx.stroke();
-  }
-  for (let y = 0; y <= GRID; y++) {
-    ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(W,y*CELL); ctx.stroke();
-  }
+  for (let x = 0; x <= GRID; x++) { ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,H); ctx.stroke(); }
+  for (let y = 0; y <= GRID; y++) { ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(W,y*CELL); ctx.stroke(); }
 
   // Border
-  ctx.strokeStyle = tournamentInfo.phase === 'active'
-    ? 'rgba(255,221,0,0.6)'
-    : 'rgba(0,255,136,0.4)';
+  ctx.strokeStyle = tournamentInfo.phase === 'active' ? 'rgba(255,221,0,0.6)' : 'rgba(0,255,136,0.4)';
   ctx.lineWidth = 3;
   ctx.strokeRect(0,0,W,H);
 
   // Food
   for (const f of gameState.food) {
-    const fx = f.x * CELL + CELL/2;
-    const fy = f.y * CELL + CELL/2;
+    const fx = f.x * CELL + CELL/2, fy = f.y * CELL + CELL/2;
     const t = Date.now() / 400;
     const pulse = 0.85 + 0.15 * Math.sin(t + f.x + f.y);
     const isSpecial = f.value > 1;
-
-    ctx.save();
-    ctx.translate(fx, fy);
-    ctx.rotate(t * 0.5);
-
+    ctx.save(); ctx.translate(fx, fy); ctx.rotate(t * 0.5);
     const size = (isSpecial ? CELL*0.45 : CELL*0.32) * pulse;
     ctx.shadowBlur = isSpecial ? 22 : 12;
     ctx.shadowColor = isSpecial ? '#ffdd00' : '#00ff88';
-
     if (isSpecial) {
       ctx.beginPath();
       for (let i = 0; i < 5; i++) {
@@ -854,76 +1011,55 @@ function loop(ts) {
         else ctx.lineTo(Math.cos(a)*size, Math.sin(a)*size);
         ctx.lineTo(Math.cos(b)*size*0.45, Math.sin(b)*size*0.45);
       }
-      ctx.closePath();
-      ctx.fillStyle = '#ffdd00';
+      ctx.closePath(); ctx.fillStyle = '#ffdd00';
     } else {
-      ctx.beginPath();
-      ctx.arc(0, 0, size, 0, Math.PI*2);
-      ctx.fillStyle = '#00ff88';
+      ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2); ctx.fillStyle = '#00ff88';
     }
-    ctx.fill();
-    ctx.restore();
+    ctx.fill(); ctx.restore();
   }
 
   // Snakes
   for (const p of gameState.players) {
     if (!p.alive || !p.body || p.body.length === 0) continue;
     const isMe = p.id === myId;
-
     for (let i = p.body.length - 1; i >= 0; i--) {
       const seg = p.body[i];
-      const cx2 = seg.x * CELL;
-      const cy2 = seg.y * CELL;
+      const cx2 = seg.x * CELL, cy2 = seg.y * CELL;
       const pct = i / p.body.length;
-
-      const alpha = isMe ? 1 : 0.85;
       ctx.save();
-
       if (i === 0) {
         ctx.shadowBlur = 18; ctx.shadowColor = p.color;
         ctx.fillStyle = p.color;
-        const r = CELL * 0.47;
-        ctx.beginPath();
-        ctx.roundRect(cx2 + 1, cy2 + 1, CELL-2, CELL-2, r);
-        ctx.fill();
-
+        ctx.beginPath(); ctx.roundRect(cx2+1, cy2+1, CELL-2, CELL-2, CELL*0.47); ctx.fill();
         ctx.shadowBlur = 0;
         const eyeOff = 4, eyeR = 2.5;
-        ctx.fillStyle = '#000';
         const dx = p.dir.x, dy = p.dir.y;
-        const ex1 = cx2 + CELL/2 + dy*eyeOff + dx*(CELL/3);
-        const ey1 = cy2 + CELL/2 - dx*eyeOff + dy*(CELL/3);
-        const ex2 = cx2 + CELL/2 - dy*eyeOff + dx*(CELL/3);
-        const ey2 = cy2 + CELL/2 + dx*eyeOff + dy*(CELL/3);
-        ctx.beginPath(); ctx.arc(ex1, ey1, eyeR, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ex2, ey2, eyeR, 0, Math.PI*2); ctx.fill();
+        const ex1 = cx2 + CELL/2 + dy*eyeOff + dx*(CELL/3), ey1 = cy2 + CELL/2 - dx*eyeOff + dy*(CELL/3);
+        const ex2 = cx2 + CELL/2 - dy*eyeOff + dx*(CELL/3), ey2 = cy2 + CELL/2 + dx*eyeOff + dy*(CELL/3);
+        ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.arc(ex1,ey1,eyeR,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex2,ey2,eyeR,0,Math.PI*2); ctx.fill();
         ctx.fillStyle = '#fff';
-        ctx.beginPath(); ctx.arc(ex1-0.8, ey1-0.8, 1, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ex2-0.8, ey2-0.8, 1, 0, Math.PI*2); ctx.fill();
-
+        ctx.beginPath(); ctx.arc(ex1-0.8,ey1-0.8,1,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(ex2-0.8,ey2-0.8,1,0,Math.PI*2); ctx.fill();
         ctx.font = isMe ? 'bold 11px "Share Tech Mono"' : '10px "Share Tech Mono"';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
         ctx.shadowBlur = 6; ctx.shadowColor = p.color;
         ctx.fillStyle = isMe ? '#fff' : 'rgba(255,255,255,0.75)';
         ctx.fillText(p.name.toUpperCase(), cx2 + CELL/2, cy2 - 4);
-
       } else {
         const brightness = 0.4 + 0.6 * (1 - pct);
         ctx.shadowBlur = 4; ctx.shadowColor = p.color;
-        ctx.fillStyle = hexAlpha(p.color, brightness * alpha);
+        ctx.fillStyle = hexAlpha(p.color, brightness * (isMe ? 1 : 0.85));
         const pad = 1 + pct * 2;
-        ctx.beginPath();
-        ctx.roundRect(cx2+pad, cy2+pad, CELL-pad*2, CELL-pad*2, (CELL-pad*2)*0.35);
-        ctx.fill();
+        ctx.beginPath(); ctx.roundRect(cx2+pad, cy2+pad, CELL-pad*2, CELL-pad*2, (CELL-pad*2)*0.35); ctx.fill();
       }
       ctx.restore();
     }
   }
-
   ctx.restore();
 
-  // ── HUD ─────────────────────────────────────────────────────
+  // HUD
   if (me) {
     document.getElementById('lenNum').textContent = me.body ? me.body.length : 0;
     document.getElementById('scoreNum').textContent = me.score || 0;
@@ -933,59 +1069,38 @@ function loop(ts) {
 
   // Dead overlay
   const dead = document.getElementById('deadOverlay');
-  const deadTournamentMsg = document.getElementById('deadTournamentMsg');
+  const deadMsg = document.getElementById('deadTournamentMsg');
   if (me && !me.alive) {
     dead.style.display = 'flex';
     if (tournamentInfo.phase === 'active' && tournamentInfo.mode === 'survival') {
       document.getElementById('deadTimer').textContent = 'SEI ELIMINATO!';
-      deadTournamentMsg.style.display = 'block';
-      deadTournamentMsg.textContent = 'Torneo Survival: nessun respawn. Attendi il vincitore!';
-    } else if (tournamentInfo.phase === 'active' && tournamentInfo.mode === 'length') {
-      const s = Math.max(0, Math.ceil((me.respawnAt - Date.now()) / 1000));
-      document.getElementById('deadTimer').textContent = `RESPAWN TRA ${s}s`;
-      deadTournamentMsg.style.display = 'none';
+      deadMsg.style.display = 'block';
+      deadMsg.textContent = 'Torneo Survival: nessun respawn. Attendi il vincitore!';
     } else {
       const s = Math.max(0, Math.ceil((me.respawnAt - Date.now()) / 1000));
       document.getElementById('deadTimer').textContent = `RESPAWN TRA ${s}s`;
-      deadTournamentMsg.style.display = 'none';
+      deadMsg.style.display = 'none';
     }
-  } else {
-    dead.style.display = 'none';
-  }
+  } else { dead.style.display = 'none'; }
 
   // Leaderboard
   const isTournament = tournamentInfo.phase === 'active';
-  const boardTitle = document.getElementById('boardTitle');
-  if (isTournament) {
-    boardTitle.textContent = tournamentInfo.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
-  } else {
-    boardTitle.textContent = '🏆 CLASSIFICA';
-  }
-
+  document.getElementById('boardTitle').textContent = isTournament
+    ? (tournamentInfo.mode === 'survival' ? '💀 SURVIVAL' : '📏 LUNGHEZZA') : '🏆 CLASSIFICA';
   let sorted;
   if (isTournament && tournamentInfo.mode === 'survival') {
-    sorted = [...gameState.players].sort((a,b) => {
-      if (a.alive && !b.alive) return -1;
-      if (!a.alive && b.alive) return 1;
-      return (b.kills||0) - (a.kills||0);
-    }).slice(0,8);
+    sorted = [...gameState.players].sort((a,b) => { if(a.alive&&!b.alive)return -1; if(!a.alive&&b.alive)return 1; return (b.kills||0)-(a.kills||0); }).slice(0,8);
   } else if (isTournament && tournamentInfo.mode === 'length') {
-    sorted = [...gameState.players].sort((a,b) => (b.tournamentMaxLength||0) - (a.tournamentMaxLength||0)).slice(0,8);
+    sorted = [...gameState.players].sort((a,b) => (b.tournamentMaxLength||0)-(a.tournamentMaxLength||0)).slice(0,8);
   } else {
-    sorted = [...gameState.players].sort((a,b) => (b.score||0) - (a.score||0)).slice(0,8);
+    sorted = [...gameState.players].sort((a,b) => (b.score||0)-(a.score||0)).slice(0,8);
   }
-
   document.getElementById('boardRows').innerHTML = sorted.map(p => {
     let stat;
-    if (isTournament && tournamentInfo.mode === 'survival') stat = p.alive ? '✅ VIVO' : '💀 MORTO';
+    if (isTournament && tournamentInfo.mode === 'survival') stat = p.alive ? '✅' : '💀';
     else if (isTournament && tournamentInfo.mode === 'length') stat = `${p.tournamentMaxLength||3}L`;
-    else stat = `${p.score||0}pt · ${p.kills||0}K`;
-    return `
-      <div class="brow">
-        <span class="bname ${p.id===myId?'bme':''}" style="color:${p.color}">${p.name.toUpperCase()}</span>
-        <span class="bscore">${stat}</span>
-      </div>
-    `;
+    else stat = `${p.score||0}pt`;
+    return `<div class="brow"><span class="bname ${p.id===myId?'bme':''}" style="color:${p.color}">${p.name.toUpperCase()}</span><span class="bscore">${stat}</span></div>`;
   }).join('');
 
   // Minimap
@@ -993,28 +1108,21 @@ function loop(ts) {
   mCtx.fillStyle = 'rgba(7,13,10,0.9)';
   mCtx.fillRect(0,0,mw,mh);
   const sx = mw/GRID, sy = mh/GRID;
-  for (const f of gameState.food) {
-    mCtx.fillStyle = f.value>1?'#ffdd00':'#00ff88';
-    mCtx.fillRect(f.x*sx, f.y*sy, sx, sy);
-  }
+  for (const f of gameState.food) { mCtx.fillStyle = f.value>1?'#ffdd00':'#00ff88'; mCtx.fillRect(f.x*sx, f.y*sy, sx, sy); }
   for (const p of gameState.players) {
     if (!p.alive || !p.body) continue;
     for (let i=0;i<p.body.length;i++) {
-      const seg = p.body[i];
       mCtx.fillStyle = i===0 ? p.color : hexAlpha(p.color,0.5);
-      mCtx.fillRect(seg.x*sx, seg.y*sy, sx, sy);
+      mCtx.fillRect(p.body[i].x*sx, p.body[i].y*sy, sx, sy);
     }
   }
   mCtx.strokeStyle = 'rgba(0,255,136,0.4)';
-  mCtx.lineWidth=1;
+  mCtx.lineWidth = 1;
   mCtx.strokeRect(camX/CELL*sx, camY/CELL*sy, canvas.width/CELL*sx, canvas.height/CELL*sy);
 }
 
-// ── Utility ──────────────────────────────────────────────────
 function hexAlpha(hex, alpha) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${alpha})`;
 }
 </script>
