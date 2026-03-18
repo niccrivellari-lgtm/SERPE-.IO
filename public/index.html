@@ -24,7 +24,7 @@ body::after{
 }
 
 /* ── LOBBY ── */
-#lobby{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;z-index:1;max-height:100vh;overflow-y:auto;}
+#lobby{display:flex;flex-direction:column;align-items:center;gap:20px;position:relative;z-index:1;max-height:100vh;overflow-y:auto;padding:20px 0;}
 #lobby h1{
   font-family:'Press Start 2P',monospace;
   font-size:clamp(1.4rem,4vw,2.8rem);color:var(--g);
@@ -79,7 +79,7 @@ body::after{
 .ctrl{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:0.6rem;color:rgba(0,255,136,0.4);letter-spacing:0.1em;}
 .ctrl span{color:var(--g);}
 
-/* ── TOURNAMENT COUNTDOWN (nella home) ── */
+/* ── TOURNAMENT COUNTDOWN BOX ── */
 #tournamentCountdownBox{
   display:none;
   background:rgba(255,221,0,0.04);border:1px solid rgba(255,221,0,0.35);
@@ -96,9 +96,10 @@ body::after{
 #tcb-mode{font-size:0.62rem;color:var(--y);letter-spacing:0.12em;margin-bottom:10px;}
 #tcb-date{font-size:0.6rem;color:rgba(255,221,0,0.7);letter-spacing:0.1em;margin-bottom:8px;}
 #tcb-timer{font-family:'Press Start 2P',monospace;font-size:1.3rem;color:var(--y);text-shadow:0 0 20px rgba(255,221,0,0.5);letter-spacing:0.08em;}
-#tcb-warning{font-size:0.55rem;color:rgba(255,100,100,0.7);letter-spacing:0.1em;margin-top:8px;display:none;}
+#tcb-status{font-size:0.55rem;letter-spacing:0.12em;margin-top:8px;}
+#tcb-registered{font-size:0.58rem;color:rgba(255,221,0,0.6);letter-spacing:0.1em;margin-top:6px;}
 
-/* ── WINNER BOARD (nella home, post torneo 15 min) ── */
+/* ── WINNER BOARD (lobby, post torneo) ── */
 #winnerBoardBox{
   display:none;
   background:rgba(255,221,0,0.03);border:1px solid rgba(255,221,0,0.5);
@@ -109,9 +110,7 @@ body::after{
 .wbb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,221,0,0.08);font-size:0.65rem;}
 .wbb-row:last-child{border:none;}
 .wbb-rank{font-family:'Press Start 2P',monospace;font-size:0.5rem;color:rgba(255,221,0,0.5);min-width:28px;}
-.wbb-rank.gold{color:#ffdd00;}
-.wbb-rank.silver{color:#aaaaaa;}
-.wbb-rank.bronze{color:#cc8844;}
+.wbb-rank.gold{color:#ffdd00;}.wbb-rank.silver{color:#aaaaaa;}.wbb-rank.bronze{color:#cc8844;}
 .wbb-name{flex:1;text-align:left;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .wbb-stat{font-family:'Press Start 2P',monospace;font-size:0.45rem;color:rgba(255,221,0,0.6);}
 #wbb-expires{font-size:0.52rem;color:rgba(255,221,0,0.3);letter-spacing:0.1em;margin-top:10px;}
@@ -126,20 +125,19 @@ body::after{
 .tmodal-box{
   background:#070d0a;border:1px solid var(--y);padding:36px;
   display:flex;flex-direction:column;gap:18px;align-items:center;
-  min-width:340px;max-width:440px;width:90%;position:relative;
-  max-height:90vh;overflow-y:auto;
+  min-width:340px;max-width:440px;width:90%;position:relative;max-height:90vh;overflow-y:auto;
 }
 .tmodal-box::before,.tmodal-box::after{content:'';position:absolute;width:14px;height:14px;border-color:var(--y);border-style:solid;}
 .tmodal-box::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
 .tmodal-box::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
-.tmodal-box h2{font-family:'Press Start 2P',monospace;font-size:0.85rem;color:var(--y);text-shadow:0 0 20px rgba(255,221,0,0.5);letter-spacing:0.1em;text-align:center;}
+.tmodal-box h2{font-family:'Press Start 2P',monospace;font-size:0.85rem;color:var(--y);letter-spacing:0.1em;text-align:center;}
 .tmodal-box p{font-size:0.6rem;color:rgba(0,255,136,0.5);letter-spacing:0.1em;text-align:center;line-height:1.8;}
 .tinput{
   width:100%;background:rgba(255,221,0,0.05);border:1px solid rgba(255,221,0,0.3);
   color:var(--y);font-family:'Press Start 2P',monospace;font-size:1.1rem;
   padding:12px;outline:none;text-align:center;letter-spacing:0.4em;
 }
-.tinput:focus{border-color:var(--y);box-shadow:0 0 14px rgba(255,221,0,0.2);}
+.tinput:focus{border-color:var(--y);}
 .tmodal-btns{display:flex;gap:12px;width:100%;}
 .tbtn{flex:1;padding:12px;border:none;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.2s;}
 .tbtn-cancel{background:transparent;color:rgba(0,255,136,0.4);border:1px solid rgba(0,255,136,0.15);}
@@ -148,47 +146,21 @@ body::after{
 .tbtn-confirm:hover{box-shadow:0 0 20px rgba(255,221,0,0.4);transform:translateY(-1px);}
 #adminError{color:var(--r);font-size:0.6rem;letter-spacing:0.1em;display:none;text-align:center;}
 
-/* Step 2: form data/ora/modalità */
 #scheduleForm{display:none;flex-direction:column;gap:14px;width:100%;}
 .sform-label{font-size:0.55rem;color:rgba(0,255,136,0.5);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;}
-.sform-input{
-  width:100%;background:rgba(0,255,136,0.05);border:1px solid var(--border);
-  color:var(--g);font-family:'Share Tech Mono',monospace;font-size:0.9rem;
-  padding:10px;outline:none;
-}
+.sform-input{width:100%;background:rgba(0,255,136,0.05);border:1px solid var(--border);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:0.9rem;padding:10px;outline:none;}
 .sform-input:focus{border-color:var(--g);}
 #modeSelect{display:flex;gap:10px;width:100%;}
-.mode-btn{
-  flex:1;padding:14px 8px;border:1px solid var(--border);background:var(--panel);color:var(--g);
-  font-family:'Press Start 2P',monospace;font-size:0.52rem;letter-spacing:0.06em;text-transform:uppercase;
-  cursor:pointer;transition:all 0.2s;text-align:center;
-}
+.mode-btn{flex:1;padding:14px 8px;border:1px solid var(--border);background:var(--panel);color:var(--g);font-family:'Press Start 2P',monospace;font-size:0.52rem;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-align:center;}
 .mode-btn:hover,.mode-btn.selected{border-color:var(--y);background:rgba(255,221,0,0.08);color:var(--y);}
 .mode-btn .mode-title{display:block;font-size:0.58rem;margin-bottom:4px;}
 .mode-btn .mode-desc{color:rgba(0,255,136,0.4);font-family:'Share Tech Mono',monospace;font-size:0.58rem;display:block;}
 #scheduleError{color:var(--r);font-size:0.58rem;letter-spacing:0.1em;display:none;text-align:center;}
 
-/* Step 3: conferma/cancella torneo esistente */
 #cancelForm{display:none;flex-direction:column;gap:14px;width:100%;align-items:center;}
 #cancelInfo{font-size:0.62rem;color:rgba(255,221,0,0.7);letter-spacing:0.1em;text-align:center;line-height:1.8;}
 #cancelBtn{width:100%;padding:12px;border:1px solid rgba(255,68,102,0.5);background:transparent;color:var(--r);font-family:'Press Start 2P',monospace;font-size:0.58rem;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
 #cancelBtn:hover{background:rgba(255,68,102,0.1);border-color:var(--r);}
-
-/* ── EXPULSION SCREEN ── */
-#expulsionScreen{
-  display:none;position:fixed;inset:0;z-index:5000;
-  background:rgba(7,13,10,0.98);align-items:center;justify-content:center;flex-direction:column;gap:24px;
-  backdrop-filter:blur(10px);
-}
-#expulsionScreen.open{display:flex;}
-.exp-icon{font-size:3rem;animation:shake 0.5s ease-in-out infinite alternate;}
-@keyframes shake{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
-.exp-title{font-family:'Press Start 2P',monospace;font-size:clamp(1rem,3vw,1.8rem);color:var(--y);text-align:center;line-height:1.8;text-shadow:0 0 30px rgba(255,221,0,0.5);}
-.exp-sub{font-size:0.65rem;color:rgba(0,255,136,0.5);letter-spacing:0.2em;text-align:center;}
-.exp-date{font-family:'Press Start 2P',monospace;font-size:0.8rem;color:var(--g);letter-spacing:0.1em;text-align:center;padding:12px 24px;border:1px solid var(--border);background:var(--panel);}
-.exp-timer-label{font-size:0.55rem;color:rgba(255,221,0,0.5);letter-spacing:0.25em;text-transform:uppercase;}
-.exp-timer{font-family:'Press Start 2P',monospace;font-size:clamp(1.8rem,5vw,3.5rem);color:var(--y);text-shadow:0 0 40px rgba(255,221,0,0.6);letter-spacing:0.1em;}
-.exp-dismiss{font-size:0.6rem;color:rgba(0,255,136,0.3);letter-spacing:0.2em;margin-top:10px;}
 
 /* ── GAME ── */
 #gameWrap{display:none;position:relative;width:100vw;height:100vh;overflow:hidden;}
@@ -197,6 +169,18 @@ body::after{
 .hpanel{background:var(--panel);border:1px solid var(--border);padding:8px 14px;font-size:0.65rem;letter-spacing:0.15em;}
 .hpanel .val{font-family:'Press Start 2P',monospace;font-size:0.9rem;color:var(--g);margin-top:4px;}
 .lbl{color:rgba(0,255,136,0.45);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;}
+
+/* Waitlist badge in-game */
+#waitlistBadge{
+  display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  background:rgba(7,13,10,0.92);border:1px solid var(--y);
+  padding:8px 20px;text-align:center;pointer-events:none;z-index:10;
+}
+#waitlistBadge .wl-label{font-size:0.5rem;color:rgba(255,221,0,0.6);letter-spacing:0.2em;}
+#waitlistBadge .wl-timer{font-family:'Press Start 2P',monospace;font-size:1rem;color:var(--y);margin-top:2px;}
+#waitlistBadge .wl-count{font-size:0.5rem;color:rgba(255,221,0,0.4);margin-top:2px;}
+#waitlistBadge .wl-status{font-size:0.5rem;margin-top:2px;letter-spacing:0.1em;}
+
 #tournamentHUD{
   display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
   background:rgba(7,13,10,0.9);border:1px solid var(--y);
@@ -205,6 +189,7 @@ body::after{
 #tournamentHUD .t-label{font-size:0.55rem;color:rgba(255,221,0,0.6);letter-spacing:0.2em;}
 #tournamentHUD .t-time{font-family:'Press Start 2P',monospace;font-size:1rem;color:var(--y);margin-top:2px;}
 #tournamentHUD .t-mode{font-size:0.55rem;color:rgba(255,221,0,0.4);margin-top:2px;letter-spacing:0.15em;}
+
 #board{position:absolute;top:10px;right:14px;background:var(--panel);border:1px solid var(--border);padding:10px 14px;min-width:190px;pointer-events:none;}
 #board h3{font-family:'Press Start 2P',monospace;font-size:0.5rem;letter-spacing:0.15em;color:rgba(0,255,136,0.45);margin-bottom:8px;}
 .brow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(0,255,136,0.07);font-size:0.68rem;}
@@ -212,17 +197,19 @@ body::after{
 .bname{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .bscore{font-family:'Press Start 2P',monospace;font-size:0.55rem;color:var(--y);}
 .bme{color:#fff!important;}
+
 #deadOverlay{display:none;position:absolute;inset:0;background:rgba(7,13,10,0.82);align-items:center;justify-content:center;flex-direction:column;gap:14px;backdrop-filter:blur(3px);}
 #deadOverlay h2{font-family:'Press Start 2P',monospace;font-size:clamp(1.4rem,4vw,2.5rem);color:var(--r);text-shadow:0 0 30px var(--r);animation:blink 0.5s step-end infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 #deadOverlay p{font-size:0.7rem;color:rgba(0,255,136,0.6);letter-spacing:0.15em;}
 .tournament-dead-msg{font-size:0.62rem;color:rgba(255,221,0,0.6);letter-spacing:0.1em;text-align:center;max-width:280px;margin-top:4px;}
+
 #minimap{position:absolute;bottom:14px;left:14px;border:1px solid var(--border);background:rgba(7,13,10,0.8);pointer-events:none;image-rendering:pixelated;}
 #killfeed{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;gap:4px;pointer-events:none;align-items:flex-end;}
 .kfitem{background:rgba(7,13,10,0.85);border-left:2px solid var(--r);padding:4px 10px;font-size:0.62rem;letter-spacing:0.1em;animation:fadeout 3s forwards;}
 @keyframes fadeout{0%,70%{opacity:1}100%{opacity:0}}
 
-/* ── WINNER OVERLAY (in-game, fine torneo) ── */
+/* ── WINNER OVERLAY (in-game) ── */
 #winnerOverlay{display:none;position:fixed;inset:0;z-index:3000;background:rgba(7,13,10,0.93);align-items:center;justify-content:center;flex-direction:column;gap:20px;backdrop-filter:blur(10px);}
 #winnerOverlay.open{display:flex;}
 .winner-trophy{font-size:4rem;animation:bounce 0.6s ease-in-out infinite alternate;}
@@ -232,13 +219,22 @@ body::after{
 @keyframes winnerglow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
 .winner-sub{font-size:0.62rem;color:rgba(255,221,0,0.5);letter-spacing:0.15em;text-align:center;}
 .winner-counter{font-family:'Press Start 2P',monospace;font-size:0.55rem;color:rgba(0,255,136,0.3);letter-spacing:0.15em;}
-
-/* winner board in-game */
 #winnerBoardInGame{display:none;background:rgba(7,13,10,0.9);border:1px solid rgba(255,221,0,0.4);padding:14px 20px;min-width:220px;max-width:300px;}
 #wbig-title{font-family:'Press Start 2P',monospace;font-size:0.5rem;color:rgba(255,221,0,0.6);letter-spacing:0.15em;margin-bottom:10px;text-align:center;}
 .wbig-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,221,0,0.07);font-size:0.65rem;}
 .wbig-row:last-child{border:none;}
 .wbig-rank{font-family:'Press Start 2P',monospace;font-size:0.45rem;min-width:24px;color:rgba(255,221,0,0.4);}
+
+/* Auto-cancel notification */
+#autoCancelNotice{
+  display:none;position:fixed;inset:0;z-index:4000;
+  background:rgba(7,13,10,0.93);align-items:center;justify-content:center;flex-direction:column;gap:16px;
+}
+#autoCancelNotice.open{display:flex;}
+.acn-icon{font-size:3rem;}
+.acn-title{font-family:'Press Start 2P',monospace;font-size:clamp(0.9rem,2.5vw,1.4rem);color:var(--r);text-align:center;line-height:1.8;}
+.acn-sub{font-size:0.62rem;color:rgba(0,255,136,0.5);letter-spacing:0.15em;text-align:center;}
+.acn-counter{font-family:'Press Start 2P',monospace;font-size:0.55rem;color:rgba(0,255,136,0.3);}
 
 .confetti-piece{position:fixed;width:8px;height:8px;top:-10px;animation:confetti-fall linear forwards;pointer-events:none;z-index:3001;}
 @keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
@@ -246,32 +242,22 @@ body::after{
 </head>
 <body>
 
-<!-- EXPULSION SCREEN -->
-<div id="expulsionScreen">
-  <div class="exp-icon">⚠️</div>
-  <div class="exp-title">TORNEO IN<br>ARRIVO!</div>
-  <div class="exp-sub">SEI STATO ESPULSO DAL GIOCO</div>
-  <div class="exp-date" id="expDate">—</div>
-  <div class="exp-timer-label">IL TORNEO INIZIA TRA</div>
-  <div class="exp-timer" id="expTimer">30:00</div>
-  <div class="exp-dismiss">Torna alla home per vedere il countdown</div>
-</div>
-
 <!-- LOBBY -->
 <div id="lobby">
   <h1>🐍 SERPE<br>.IO</h1>
   <p class="tagline">Multiplayer Chaos · Lobby Globale · Real-Time</p>
 
-  <!-- TOURNAMENT COUNTDOWN (appare quando c'è un torneo programmato) -->
+  <!-- Tournament countdown / registration box -->
   <div id="tournamentCountdownBox">
     <div id="tcb-label">🏆 PROSSIMO TORNEO</div>
     <div id="tcb-mode"></div>
     <div id="tcb-date"></div>
     <div id="tcb-timer">--:--:--</div>
-    <div id="tcb-warning">⚠ TORNEO IN CORSO — ACCESSO BLOCCATO</div>
+    <div id="tcb-status"></div>
+    <div id="tcb-registered" style="display:none"></div>
   </div>
 
-  <!-- WINNER BOARD (appare dopo il torneo, per 15 min) -->
+  <!-- Winner board post-torneo -->
   <div id="winnerBoardBox">
     <div id="wbb-title">🏆 CLASSIFICA FINALE</div>
     <div id="wbb-mode"></div>
@@ -296,8 +282,6 @@ body::after{
 <div id="tournamentModal">
   <div class="tmodal-box">
     <h2>🏆 TORNEO ADMIN</h2>
-
-    <!-- Step 1: pin -->
     <div id="step-code" style="width:100%;display:flex;flex-direction:column;gap:16px;align-items:center;">
       <p>Inserisci il codice admin</p>
       <input class="tinput" id="adminCode" type="password" maxlength="6" placeholder="• • • • • •" autocomplete="off"/>
@@ -307,8 +291,6 @@ body::after{
         <button class="tbtn tbtn-confirm" id="tCodeConfirm">CONFERMA</button>
       </div>
     </div>
-
-    <!-- Step 2: programma torneo -->
     <div id="scheduleForm">
       <p>Scegli data, ora e modalità del torneo</p>
       <div>
@@ -317,11 +299,11 @@ body::after{
       </div>
       <div class="sform-label">MODALITÀ</div>
       <div id="modeSelect">
-        <button class="mode-btn" id="modeKills" data-mode="survival">
+        <button class="mode-btn" data-mode="survival">
           <span class="mode-title">💀 SURVIVAL</span>
           <span class="mode-desc">Ultimo vivo vince</span>
         </button>
-        <button class="mode-btn" id="modeLength" data-mode="length">
+        <button class="mode-btn" data-mode="length">
           <span class="mode-title">📏 LUNGHEZZA</span>
           <span class="mode-desc">Più lungo in 10 min</span>
         </button>
@@ -332,8 +314,6 @@ body::after{
         <button class="tbtn tbtn-confirm" id="sFormConfirm">✓ PROGRAMMA</button>
       </div>
     </div>
-
-    <!-- Step 3: torneo già programmato → mostra info o cancella -->
     <div id="cancelForm">
       <div id="cancelInfo">Torneo programmato:<br><span id="cancelInfoDetail" style="color:var(--y)">—</span></div>
       <button class="tbtn tbtn-confirm" id="tNewSchedule" style="width:100%;background:rgba(0,255,136,0.15);color:var(--g);border:1px solid var(--g);">+ NUOVO TORNEO</button>
@@ -346,23 +326,37 @@ body::after{
 <!-- GAME -->
 <div id="gameWrap">
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Waitlist HUD (durante registration, in-game) -->
+  <div id="waitlistBadge">
+    <div class="wl-label">🏆 TORNEO TRA</div>
+    <div class="wl-timer" id="wlTimer">--:--</div>
+    <div class="wl-count" id="wlCount">0 iscritti</div>
+    <div class="wl-status" id="wlStatus" style="color:var(--g);">✅ SEI IN LISTA D'ATTESA</div>
+  </div>
+
+  <!-- Tournament active HUD -->
   <div id="tournamentHUD">
     <div class="t-label">TORNEO IN CORSO</div>
     <div class="t-time" id="tHudTime">10:00</div>
     <div class="t-mode" id="tHudMode"></div>
   </div>
+
   <div id="hud">
     <div class="hpanel"><div class="lbl">LUNGHEZZA</div><div class="val" id="lenNum">3</div></div>
     <div class="hpanel" style="text-align:center"><div class="lbl">PUNTEGGIO</div><div class="val" id="scoreNum">0</div></div>
     <div class="hpanel" style="text-align:center"><div class="lbl">KILLS</div><div class="val" id="killsNum">0</div></div>
     <div class="hpanel" style="text-align:center"><div class="lbl">ONLINE</div><div class="val" id="onlineNum">0</div></div>
   </div>
+
   <div id="board"><h3 id="boardTitle">🏆 CLASSIFICA</h3><div id="boardRows"></div></div>
+
   <div id="deadOverlay">
     <h2>HAI PERSO!</h2>
     <p id="deadTimer">RESPAWN TRA 3s</p>
     <p class="tournament-dead-msg" id="deadTournamentMsg" style="display:none;"></p>
   </div>
+
   <canvas id="minimap" width="120" height="120"></canvas>
   <div id="killfeed"></div>
 </div>
@@ -372,12 +366,20 @@ body::after{
   <div class="winner-trophy">🏆</div>
   <div class="winner-title">VINCITORE DEL TORNEO</div>
   <div class="winner-name" id="winnerName">---</div>
-  <div class="winner-sub" id="winnerSub">ha dominato il torneo!</div>
+  <div class="winner-sub" id="winnerSub"></div>
   <div id="winnerBoardInGame">
     <div id="wbig-title">CLASSIFICA FINALE</div>
     <div id="wbig-rows"></div>
   </div>
   <div class="winner-counter" id="winnerCounter">ritorno alla home tra 15s...</div>
+</div>
+
+<!-- AUTO-CANCEL NOTICE -->
+<div id="autoCancelNotice">
+  <div class="acn-icon">⚠️</div>
+  <div class="acn-title">TORNEO ANNULLATO</div>
+  <div class="acn-sub" id="acnSub">Iscritti insufficienti</div>
+  <div class="acn-counter" id="acnCounter">ritorno al gioco tra 5s...</div>
 </div>
 
 <script>
@@ -387,7 +389,7 @@ body::after{
 let GRID = 40, CELL = 20;
 let myId = null, ws = null;
 let gameState = null, prevState = null;
-let tournamentInfo = { phase: 'normal', scheduledAt: 0, expulsionAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+let tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0, registeredCount: 0 };
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -413,7 +415,7 @@ function updateLobbyCountdown() {
   const wbb = document.getElementById('winnerBoardBox');
   const joinBtn = document.getElementById('joinBtn');
 
-  // Winner board (post torneo, 15 min)
+  // Winner board post-torneo
   if (tournamentInfo.winnerBoard && tournamentInfo.winnerBoard.length > 0 && tournamentInfo.winnerBoardExpiresAt > Date.now()) {
     renderWinnerBoard();
     wbb.style.display = 'block';
@@ -425,16 +427,15 @@ function updateLobbyCountdown() {
     box.style.display = 'none';
     joinBtn.disabled = false;
     joinBtn.textContent = '▶ ENTRA IN PARTITA';
+    if (lobbyCountdownInterval) clearInterval(lobbyCountdownInterval);
     return;
   }
 
   box.style.display = 'block';
 
-  // Modalità
   const modeLabel = tournamentInfo.mode === 'survival' ? '💀 TORNEO SURVIVAL' : '📏 TORNEO LUNGHEZZA';
   document.getElementById('tcb-mode').textContent = modeLabel;
 
-  // Data formattata
   const d = new Date(tournamentInfo.scheduledAt);
   const giorni = ['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
   const mesi = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC'];
@@ -444,35 +445,68 @@ function updateLobbyCountdown() {
   if (lobbyCountdownInterval) clearInterval(lobbyCountdownInterval);
   lobbyCountdownInterval = setInterval(() => {
     const now = Date.now();
-    const remaining = tournamentInfo.scheduledAt - now;
+    const phase = tournamentInfo.phase;
+    const tcbStatus = document.getElementById('tcb-status');
+    const tcbRegistered = document.getElementById('tcb-registered');
 
-    if (tournamentInfo.phase === 'active' || remaining <= 0) {
+    if (phase === 'active') {
+      document.getElementById('tcb-label').textContent = '🏆 TORNEO IN CORSO';
       document.getElementById('tcb-timer').textContent = 'IN CORSO!';
-      document.getElementById('tcb-warning').style.display = 'block';
+      tcbStatus.textContent = '🔒 Accesso bloccato per non iscritti';
+      tcbStatus.style.color = 'var(--r)';
+      tcbRegistered.style.display = 'none';
       joinBtn.disabled = true;
       joinBtn.textContent = '🔒 TORNEO IN CORSO';
       clearInterval(lobbyCountdownInterval);
       return;
     }
 
-    if (tournamentInfo.phase === 'expelling') {
-      document.getElementById('tcb-warning').style.display = 'block';
-      joinBtn.disabled = true;
-      joinBtn.textContent = '🔒 TORNEO IN ARRIVO';
-    } else {
-      document.getElementById('tcb-warning').style.display = 'none';
+    if (phase === 'registration') {
+      // Finestra aperta: si può entrare e ci si iscrive automaticamente
+      document.getElementById('tcb-label').textContent = '🏆 REGISTRAZIONE APERTA!';
+      tcbStatus.textContent = '✅ Entra ora per partecipare al torneo!';
+      tcbStatus.style.color = 'var(--g)';
+      tcbRegistered.style.display = 'block';
+      tcbRegistered.textContent = `${tournamentInfo.registeredCount || 0} iscritti`;
       joinBtn.disabled = false;
-      joinBtn.textContent = '▶ ENTRA IN PARTITA';
+      joinBtn.textContent = '▶ ENTRA E ISCRIVITI AL TORNEO';
+      const rem = Math.max(0, tournamentInfo.scheduledAt - now);
+      const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
+      document.getElementById('tcb-timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      return;
     }
 
-    const h = Math.floor(remaining / 3600000);
-    const m = Math.floor((remaining % 3600000) / 60000);
-    const s = Math.floor((remaining % 60000) / 1000);
-    let timerStr;
-    if (h > 0) timerStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    else timerStr = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    document.getElementById('tcb-timer').textContent = timerStr;
+    // phase === scheduled
+    const remToReg = tournamentInfo.registrationAt - now;
+    if (remToReg > 0) {
+      // Ancora lontano dalla registrazione: countdown all'apertura registrazione
+      document.getElementById('tcb-label').textContent = '🏆 PROSSIMO TORNEO';
+      tcbStatus.textContent = `Registrazione apre tra ${fmtTime(remToReg)}`;
+      tcbStatus.style.color = 'rgba(255,221,0,0.5)';
+      tcbRegistered.style.display = 'none';
+      joinBtn.disabled = false;
+      joinBtn.textContent = '▶ ENTRA IN PARTITA';
+      const rem = Math.max(0, tournamentInfo.scheduledAt - now);
+      const h = Math.floor(rem / 3600000), m = Math.floor((rem % 3600000) / 60000), s = Math.floor((rem % 60000) / 1000);
+      document.getElementById('tcb-timer').textContent = h > 0
+        ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+        : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    } else {
+      // Siamo nei 30 min ma phase non aggiornata ancora: aggiorna visuale
+      document.getElementById('tcb-label').textContent = '🏆 REGISTRAZIONE APERTA!';
+      tcbStatus.textContent = '✅ Entra ora per partecipare al torneo!';
+      tcbStatus.style.color = 'var(--g)';
+      joinBtn.disabled = false;
+      joinBtn.textContent = '▶ ENTRA E ISCRIVITI AL TORNEO';
+    }
   }, 500);
+}
+
+function fmtTime(ms) {
+  const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000), s = Math.floor((ms % 60000) / 1000);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
 }
 
 function renderWinnerBoard() {
@@ -486,60 +520,16 @@ function renderWinnerBoard() {
       <span class="wbb-rank ${rankClasses[i] || ''}">${rankLabels[i] || `#${p.rank}`}</span>
       <span class="wbb-name" style="color:${p.color}">${p.name.toUpperCase()}</span>
       <span class="wbb-stat">${p.stat}</span>
-    </div>
-  `).join('');
+    </div>`).join('');
 
   if (wbbExpiresInterval) clearInterval(wbbExpiresInterval);
   wbbExpiresInterval = setInterval(() => {
     const rem = Math.max(0, tournamentInfo.winnerBoardExpiresAt - Date.now());
-    const m = Math.floor(rem / 60000);
-    const s = Math.floor((rem % 60000) / 1000);
+    const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
     document.getElementById('wbb-expires').textContent =
       rem > 0 ? `Classifica visibile per ancora ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : '';
-    if (rem <= 0) {
-      clearInterval(wbbExpiresInterval);
-      document.getElementById('winnerBoardBox').style.display = 'none';
-    }
+    if (rem <= 0) { clearInterval(wbbExpiresInterval); document.getElementById('winnerBoardBox').style.display = 'none'; }
   }, 1000);
-}
-
-// ──────────────────────────────────────────────────────────────
-//  EXPULSION SCREEN
-// ──────────────────────────────────────────────────────────────
-let expTimerInterval = null;
-
-function showExpulsionScreen(scheduledAt) {
-  const scr = document.getElementById('expulsionScreen');
-  scr.classList.add('open');
-
-  const d = new Date(scheduledAt);
-  const giorni = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
-  const mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  document.getElementById('expDate').textContent =
-    `${giorni[d.getDay()]} ${d.getDate()} ${mesi[d.getMonth()]} — ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-
-  if (expTimerInterval) clearInterval(expTimerInterval);
-  expTimerInterval = setInterval(() => {
-    const rem = Math.max(0, scheduledAt - Date.now());
-    const h = Math.floor(rem / 3600000);
-    const m = Math.floor((rem % 3600000) / 60000);
-    const s = Math.floor((rem % 60000) / 1000);
-    let t;
-    if (h > 0) t = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    else t = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    document.getElementById('expTimer').textContent = t;
-    if (rem <= 0) {
-      clearInterval(expTimerInterval);
-      document.getElementById('expTimer').textContent = '🏁 VIA!';
-      setTimeout(() => scr.classList.remove('open'), 3000);
-    }
-  }, 500);
-
-  // Dopo 5s mostra la home sotto (con countdown)
-  setTimeout(() => {
-    scr.classList.remove('open');
-    updateLobbyCountdown();
-  }, 8000);
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -551,151 +541,86 @@ const adminError = document.getElementById('adminError');
 const stepCode = document.getElementById('step-code');
 const scheduleForm = document.getElementById('scheduleForm');
 const cancelForm = document.getElementById('cancelForm');
-
 let selectedMode = null;
 
 document.getElementById('tournamentBtn').addEventListener('click', () => {
-  adminCodeInput.value = '';
-  adminError.style.display = 'none';
-  stepCode.style.display = 'flex';
-  scheduleForm.style.display = 'none';
-  cancelForm.style.display = 'none';
+  adminCodeInput.value = ''; adminError.style.display = 'none';
+  stepCode.style.display = 'flex'; scheduleForm.style.display = 'none'; cancelForm.style.display = 'none';
   tournamentModal.classList.add('open');
   setTimeout(() => adminCodeInput.focus(), 100);
 });
 document.getElementById('tModalClose').addEventListener('click', () => tournamentModal.classList.remove('open'));
 document.getElementById('cancelModalClose').addEventListener('click', () => tournamentModal.classList.remove('open'));
-
 document.getElementById('tCodeConfirm').addEventListener('click', verifyCode);
 adminCodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyCode(); });
 
 function verifyCode() {
-  const code = adminCodeInput.value.trim();
-  if (code !== '479572') {
-    adminError.style.display = 'block';
-    adminCodeInput.value = '';
-    adminCodeInput.focus();
-    setTimeout(() => { adminError.style.display = 'none'; }, 2000);
-    return;
+  if (adminCodeInput.value.trim() !== '479572') {
+    adminError.style.display = 'block'; adminCodeInput.value = ''; adminCodeInput.focus();
+    setTimeout(() => { adminError.style.display = 'none'; }, 2000); return;
   }
   stepCode.style.display = 'none';
-  // Se c'è già un torneo programmato → mostra info/cancella
-  if (tournamentInfo.phase !== 'normal') {
-    showCancelForm();
-  } else {
-    showScheduleForm();
-  }
+  if (tournamentInfo.phase !== 'normal') showCancelForm(); else showScheduleForm();
 }
-
 function showScheduleForm() {
-  scheduleForm.style.display = 'flex';
-  cancelForm.style.display = 'none';
-  // Imposta minimo datetime-local = adesso + 2 min
+  scheduleForm.style.display = 'flex'; cancelForm.style.display = 'none';
   const minDt = new Date(Date.now() + 2 * 60 * 1000);
   document.getElementById('scheduleDateTime').min = minDt.toISOString().slice(0,16);
-  selectedMode = null;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  selectedMode = null; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('scheduleError').style.display = 'none';
 }
-
 function showCancelForm() {
-  scheduleForm.style.display = 'none';
-  cancelForm.style.display = 'flex';
+  scheduleForm.style.display = 'none'; cancelForm.style.display = 'flex';
   if (tournamentInfo.scheduledAt) {
     const d = new Date(tournamentInfo.scheduledAt);
     const modeLabel = tournamentInfo.mode === 'survival' ? 'SURVIVAL' : 'LUNGHEZZA';
-    document.getElementById('cancelInfoDetail').textContent =
-      `${modeLabel} — ${d.toLocaleString('it-IT')}`;
+    document.getElementById('cancelInfoDetail').textContent = `${modeLabel} — ${d.toLocaleString('it-IT')}`;
   }
 }
-
-document.getElementById('sFormBack').addEventListener('click', () => {
-  scheduleForm.style.display = 'none';
-  stepCode.style.display = 'flex';
-  adminCodeInput.value = '';
-});
-
+document.getElementById('sFormBack').addEventListener('click', () => { scheduleForm.style.display = 'none'; stepCode.style.display = 'flex'; adminCodeInput.value = ''; });
 document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedMode = btn.dataset.mode;
-  });
+  btn.addEventListener('click', () => { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); selectedMode = btn.dataset.mode; });
 });
-
 document.getElementById('sFormConfirm').addEventListener('click', () => {
   const dtVal = document.getElementById('scheduleDateTime').value;
   const err = document.getElementById('scheduleError');
-  if (!dtVal || !selectedMode) {
-    err.style.display = 'block';
-    err.textContent = '⚠ SELEZIONA DATA E MODALITÀ';
-    return;
-  }
+  if (!dtVal || !selectedMode) { err.style.display = 'block'; err.textContent = '⚠ SELEZIONA DATA E MODALITÀ'; return; }
   const scheduledAt = new Date(dtVal).getTime();
-  if (scheduledAt <= Date.now() + 60000) {
-    err.style.display = 'block';
-    err.textContent = '⚠ ORA TROPPO VICINA — MINIMO 1 MINUTO';
-    return;
-  }
+  if (scheduledAt <= Date.now() + 60000) { err.style.display = 'block'; err.textContent = '⚠ ORA TROPPO VICINA — MINIMO 1 MINUTO'; return; }
   err.style.display = 'none';
   sendAdminSchedule(selectedMode, scheduledAt);
   tournamentModal.classList.remove('open');
 });
+document.getElementById('tNewSchedule').addEventListener('click', () => { showScheduleForm(); cancelForm.style.display = 'none'; });
+document.getElementById('cancelBtn').addEventListener('click', () => { sendAdminCancel(); tournamentModal.classList.remove('open'); });
 
-document.getElementById('tNewSchedule').addEventListener('click', () => {
-  showScheduleForm();
-  cancelForm.style.display = 'none';
-});
-
-document.getElementById('cancelBtn').addEventListener('click', () => {
-  sendAdminCancel();
-  tournamentModal.classList.remove('open');
-});
-
-function sendAdminSchedule(mode, scheduledAt) {
+function sendAdminMsg(msgObj) {
+  if (ws && ws.readyState === 1) { ws.send(JSON.stringify(msgObj)); return; }
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({ type: 'admin_schedule_tournament', code: '479572', mode, scheduledAt }));
-  } else {
-    const tempWs = new WebSocket(`${proto}://${location.host}`);
-    tempWs.onopen = () => {
-      tempWs.send(JSON.stringify({ type: 'join', name: '_admin_' }));
-      setTimeout(() => {
-        tempWs.send(JSON.stringify({ type: 'admin_schedule_tournament', code: '479572', mode, scheduledAt }));
-        setTimeout(() => tempWs.close(), 500);
-      }, 200);
-    };
-    tempWs.onmessage = e => {
+  const tempWs = new WebSocket(`${proto}://${location.host}`);
+  tempWs.onopen = () => {
+    tempWs.send(JSON.stringify({ type: 'join', name: '_admin_' }));
+    setTimeout(() => { tempWs.send(JSON.stringify(msgObj)); setTimeout(() => tempWs.close(), 500); }, 200);
+  };
+  tempWs.onmessage = e => {
+    try {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'admin_ok') {
-        tournamentInfo.phase = 'scheduled';
-        tournamentInfo.mode = mode;
-        tournamentInfo.scheduledAt = scheduledAt;
-        tournamentInfo.expulsionAt = scheduledAt - 30 * 60 * 1000;
+      if (msg.type === 'admin_ok' || msg.type === 'tournament_scheduled') {
+        if (msg.tournament) { tournamentInfo = msg.tournament; updateLobbyCountdown(); }
+      }
+      if (msg.type === 'tournament_cancelled') {
+        tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
         updateLobbyCountdown();
       }
-    };
-  }
+    } catch {}
+  };
+  tempWs.onerror = () => {};
 }
-
-function sendAdminCancel() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({ type: 'admin_cancel_tournament', code: '479572' }));
-  } else {
-    const tempWs = new WebSocket(`${proto}://${location.host}`);
-    tempWs.onopen = () => {
-      tempWs.send(JSON.stringify({ type: 'join', name: '_admin_' }));
-      setTimeout(() => {
-        tempWs.send(JSON.stringify({ type: 'admin_cancel_tournament', code: '479572' }));
-        setTimeout(() => tempWs.close(), 500);
-      }, 200);
-    };
-  }
-}
+function sendAdminSchedule(mode, scheduledAt) { sendAdminMsg({ type: 'admin_schedule_tournament', code: '479572', mode, scheduledAt }); }
+function sendAdminCancel() { sendAdminMsg({ type: 'admin_cancel_tournament', code: '479572' }); }
 
 // ──────────────────────────────────────────────────────────────
-//  WINNER OVERLAY (in-game)
+//  WINNER OVERLAY
 // ──────────────────────────────────────────────────────────────
 function showWinnerOverlay(msg) {
   const overlay = document.getElementById('winnerOverlay');
@@ -703,8 +628,6 @@ function showWinnerOverlay(msg) {
   document.getElementById('winnerName').style.color = msg.winnerColor || '#ffdd00';
   document.getElementById('winnerSub').textContent = msg.mode === 'survival'
     ? 'è l\'ultimo sopravvissuto! 💀' : 'era il serpente più lungo! 📏';
-
-  // Winner board in overlay
   if (msg.winnerBoard && msg.winnerBoard.length > 0) {
     document.getElementById('winnerBoardInGame').style.display = 'block';
     const rankLabels = ['🥇','🥈','🥉'];
@@ -715,21 +638,33 @@ function showWinnerOverlay(msg) {
         <span style="font-size:0.5rem;color:rgba(255,221,0,0.5);font-family:'Press Start 2P',monospace;">${p.stat}</span>
       </div>`).join('');
   }
-
   overlay.classList.add('open');
   spawnConfetti();
-
   let countdown = 15;
   const counter = document.getElementById('winnerCounter');
   const t = setInterval(() => {
     countdown--;
     counter.textContent = `ritorno alla home tra ${countdown}s...`;
-    if (countdown <= 0) {
-      clearInterval(t);
-      overlay.classList.remove('open');
-      // Torna alla home
-      if (ws) ws.close();
-    }
+    if (countdown <= 0) { clearInterval(t); overlay.classList.remove('open'); if (ws) ws.close(); }
+  }, 1000);
+}
+
+// ──────────────────────────────────────────────────────────────
+//  AUTO-CANCEL NOTICE
+// ──────────────────────────────────────────────────────────────
+function showAutoCancelNotice(reason, registeredCount) {
+  const notice = document.getElementById('autoCancelNotice');
+  const subEl = document.getElementById('acnSub');
+  subEl.textContent = registeredCount <= 1
+    ? `Solo ${registeredCount} giocatore iscritto — servono almeno 2!`
+    : 'Iscritti insufficienti per il torneo.';
+  notice.classList.add('open');
+  let countdown = 5;
+  const counter = document.getElementById('acnCounter');
+  const t = setInterval(() => {
+    countdown--;
+    counter.textContent = `ritorno al gioco tra ${countdown}s...`;
+    if (countdown <= 0) { clearInterval(t); notice.classList.remove('open'); }
   }, 1000);
 }
 
@@ -754,10 +689,8 @@ function spawnConfetti() {
 //  CONTROLS
 // ──────────────────────────────────────────────────────────────
 const DIR = {
-  ArrowUp:{x:0,y:-1}, KeyW:{x:0,y:-1},
-  ArrowDown:{x:0,y:1}, KeyS:{x:0,y:1},
-  ArrowLeft:{x:-1,y:0}, KeyA:{x:-1,y:0},
-  ArrowRight:{x:1,y:0}, KeyD:{x:1,y:0},
+  ArrowUp:{x:0,y:-1}, KeyW:{x:0,y:-1}, ArrowDown:{x:0,y:1}, KeyS:{x:0,y:1},
+  ArrowLeft:{x:-1,y:0}, KeyA:{x:-1,y:0}, ArrowRight:{x:1,y:0}, KeyD:{x:1,y:0},
 };
 window.addEventListener('keydown', e => {
   if (!ws || ws.readyState !== 1 || !myId) return;
@@ -786,30 +719,22 @@ document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key
 function joinGame() {
   const name = document.getElementById('nameInput').value.trim();
   const nameErr = document.getElementById('nameError');
-
   if (!name) {
-    nameErr.style.display = 'block';
-    document.getElementById('nameInput').focus();
-    setTimeout(() => { nameErr.style.display = 'none'; }, 2500);
-    return;
+    nameErr.style.display = 'block'; document.getElementById('nameInput').focus();
+    setTimeout(() => { nameErr.style.display = 'none'; }, 2500); return;
   }
-
+  // Solo durante torneo ATTIVO non si può entrare
   if (tournamentInfo.phase === 'active') {
-    alert('⚠ Torneo in corso — non puoi entrare!');
-    return;
-  }
-  if (tournamentInfo.phase === 'expelling') {
-    alert('⚠ Il torneo sta per iniziare — accesso bloccato!');
-    return;
+    alert('🔒 Torneo in corso — non sei iscritto, aspetta la fine!'); return;
   }
 
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   ws = new WebSocket(`${proto}://${location.host}`);
-
   ws.onopen = () => ws.send(JSON.stringify({ type:'join', name }));
 
   ws.onmessage = e => {
-    const msg = JSON.parse(e.data);
+    let msg;
+    try { msg = JSON.parse(e.data); } catch { return; }
 
     if (msg.type === 'init') {
       myId = msg.id;
@@ -824,7 +749,10 @@ function joinGame() {
     if (msg.type === 'join_rejected') {
       ws.close();
       if (msg.reason === 'no_name') alert('⚠ Inserisci un nome!');
-      else if (msg.reason === 'tournament_active') alert('🔒 Torneo in corso — accesso bloccato!');
+      else if (msg.reason === 'tournament_active') alert('🔒 Torneo in corso e non sei iscritto. Attendi la fine del torneo!');
+      else if (msg.reason === 'tournament_active_not_registered') {
+        // Espulso perché non era in lista — vai alla lobby
+      }
     }
 
     if (msg.type === 'state') {
@@ -834,19 +762,27 @@ function joinGame() {
       if (msg.tournament) tournamentInfo = msg.tournament;
     }
 
-    if (msg.type === 'tournament_scheduled') {
-      tournamentInfo = msg;
-      // Non influenza il gioco in corso
+    if (msg.type === 'tournament_scheduled' || msg.type === 'tournament_update') {
+      if (msg.tournament) tournamentInfo = msg.tournament;
     }
 
-    if (msg.type === 'tournament_expulsion') {
-      // Il server sta per espellerci — il ws.onclose gestirà il ritorno alla home
-      tournamentInfo.scheduledAt = msg.scheduledAt;
+    if (msg.type === 'tournament_registration_open') {
+      if (msg.tournament) tournamentInfo = msg.tournament;
+      // Mostra notifica all'utente che è stato iscritto automaticamente
+      addKillFeed('🏆 REGISTRAZIONE APERTA', '#ffdd00', 'Sei in lista d\'attesa!', '#00ff88');
+    }
+
+    if (msg.type === 'tournament_start') {
+      if (msg.tournament) tournamentInfo = msg.tournament;
     }
 
     if (msg.type === 'tournament_cancelled') {
-      tournamentInfo = { phase: 'normal', scheduledAt: 0, expulsionAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
-      updateLobbyCountdown();
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+    }
+
+    if (msg.type === 'tournament_auto_cancelled') {
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+      showAutoCancelNotice(msg.reason, msg.registeredCount);
     }
 
     if (msg.type === 'tournament_end') {
@@ -855,12 +791,18 @@ function joinGame() {
       tournamentInfo.winnerBoardExpiresAt = msg.winnerBoardExpiresAt;
       tournamentInfo.mode = msg.mode;
       document.getElementById('tournamentHUD').style.display = 'none';
+      document.getElementById('waitlistBadge').style.display = 'none';
       showWinnerOverlay(msg);
     }
 
     if (msg.type === 'tournament_reset') {
-      tournamentInfo = { phase: 'normal', scheduledAt: 0, expulsionAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
       document.getElementById('tournamentHUD').style.display = 'none';
+      document.getElementById('waitlistBadge').style.display = 'none';
+    }
+
+    if (msg.type === 'tournament_status') {
+      // Solo dal check iniziale, non siamo in gioco
     }
   };
 
@@ -868,19 +810,13 @@ function joinGame() {
     document.getElementById('gameWrap').style.display = 'none';
     document.getElementById('winnerOverlay').classList.remove('open');
     document.getElementById('lobby').style.display = 'flex';
+    document.getElementById('waitlistBadge').style.display = 'none';
     gameState = null; prevState = null; myId = null;
-
-    // Se la chiusura è dovuta a espulsione per torneo
-    if (e.reason === 'tournament_expulsion') {
-      showExpulsionScreen(tournamentInfo.scheduledAt || 0);
-    }
-
     updateLobbyCountdown();
   };
 }
 
-// Avvia countdown anche se non connesso (se ricarichiamo la pagina)
-// Fetch stato torneo dal server via polling leggero all'apertura
+// Polling iniziale stato torneo
 (function checkTournamentStatus() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const checkWs = new WebSocket(`${proto}://${location.host}`);
@@ -888,14 +824,7 @@ function joinGame() {
   checkWs.onmessage = e => {
     try {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'join_rejected') {
-        // Torneo attivo
-        tournamentInfo.phase = 'active';
-        updateLobbyCountdown();
-        checkWs.close();
-        return;
-      }
-      if (msg.type === 'init' && msg.tournament) {
+      if (msg.type === 'tournament_status' && msg.tournament) {
         tournamentInfo = msg.tournament;
         updateLobbyCountdown();
         checkWs.close();
@@ -903,7 +832,6 @@ function joinGame() {
     } catch {}
   };
   checkWs.onerror = () => {};
-  checkWs.onclose = () => {};
   setTimeout(() => { try { checkWs.close(); } catch {} }, 3000);
 })();
 
@@ -934,18 +862,43 @@ function addKillFeed(killer, kColor, victim, vColor) {
 // ──────────────────────────────────────────────────────────────
 //  CAMERA
 // ──────────────────────────────────────────────────────────────
-let camX = 0, camY = 0, camTargetX = 0, camTargetY = 0;
+let camX = 0, camY = 0;
 function updateCamera(me) {
   if (!me || !me.body || !me.body[0]) return;
   const head = me.body[0];
-  camTargetX = head.x * CELL + CELL/2 - canvas.width/2;
-  camTargetY = head.y * CELL + CELL/2 - canvas.height/2;
-  camX += (camTargetX - camX) * 0.15;
-  camY += (camTargetY - camY) * 0.15;
+  const targetX = head.x * CELL + CELL/2 - canvas.width/2;
+  const targetY = head.y * CELL + CELL/2 - canvas.height/2;
+  camX += (targetX - camX) * 0.15;
+  camY += (targetY - camY) * 0.15;
 }
 
 // ──────────────────────────────────────────────────────────────
-//  TOURNAMENT HUD
+//  WAITLIST HUD (in-game, durante registration)
+// ──────────────────────────────────────────────────────────────
+function updateWaitlistBadge() {
+  const badge = document.getElementById('waitlistBadge');
+  const me = gameState ? gameState.players.find(p => p.id === myId) : null;
+
+  if (tournamentInfo.phase === 'registration') {
+    badge.style.display = 'block';
+    document.getElementById('tournamentHUD').style.display = 'none';
+
+    const rem = Math.max(0, tournamentInfo.scheduledAt - Date.now());
+    const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
+    document.getElementById('wlTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('wlCount').textContent = `${tournamentInfo.registeredCount || 0} iscritti`;
+
+    const inList = me && me.inTournamentWaitlist;
+    const statusEl = document.getElementById('wlStatus');
+    statusEl.textContent = inList ? '✅ SEI IN LISTA D\'ATTESA' : '⏳ NON ISCRITTO';
+    statusEl.style.color = inList ? 'var(--g)' : 'rgba(255,221,0,0.6)';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+//  TOURNAMENT HUD (in-game, durante active)
 // ──────────────────────────────────────────────────────────────
 function updateTournamentHUD() {
   const thud = document.getElementById('tournamentHUD');
@@ -954,10 +907,8 @@ function updateTournamentHUD() {
   document.getElementById('tHudMode').textContent =
     tournamentInfo.mode === 'survival' ? '💀 SURVIVAL' : '📏 LUNGHEZZA';
   if (tournamentInfo.mode === 'survival') {
-    if (gameState) {
-      const alive = gameState.players.filter(p => p.alive).length;
-      document.getElementById('tHudTime').textContent = alive + ' VIVI';
-    }
+    const alive = gameState ? gameState.players.filter(p => p.alive).length : 0;
+    document.getElementById('tHudTime').textContent = alive + ' VIVI';
   } else {
     const rem = Math.max(0, tournamentInfo.gameEndsAt - Date.now());
     const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
@@ -973,6 +924,7 @@ function loop() {
   if (!gameState) return;
   const me = gameState.players.find(p => p.id === myId);
   if (me) updateCamera(me);
+  updateWaitlistBadge();
   updateTournamentHUD();
 
   const W = GRID * CELL, H = GRID * CELL;
@@ -982,13 +934,14 @@ function loop() {
   ctx.translate(-camX, -camY);
 
   // Grid
-  ctx.strokeStyle = 'rgba(0,255,136,0.05)';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(0,255,136,0.05)'; ctx.lineWidth = 1;
   for (let x = 0; x <= GRID; x++) { ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,H); ctx.stroke(); }
   for (let y = 0; y <= GRID; y++) { ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(W,y*CELL); ctx.stroke(); }
 
   // Border
-  ctx.strokeStyle = tournamentInfo.phase === 'active' ? 'rgba(255,221,0,0.6)' : 'rgba(0,255,136,0.4)';
+  const isActive = tournamentInfo.phase === 'active';
+  const isReg = tournamentInfo.phase === 'registration';
+  ctx.strokeStyle = isActive ? 'rgba(255,221,0,0.6)' : isReg ? 'rgba(0,255,136,0.6)' : 'rgba(0,255,136,0.4)';
   ctx.lineWidth = 3;
   ctx.strokeRect(0,0,W,H);
 
@@ -1028,8 +981,7 @@ function loop() {
       const pct = i / p.body.length;
       ctx.save();
       if (i === 0) {
-        ctx.shadowBlur = 18; ctx.shadowColor = p.color;
-        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 18; ctx.shadowColor = p.color; ctx.fillStyle = p.color;
         ctx.beginPath(); ctx.roundRect(cx2+1, cy2+1, CELL-2, CELL-2, CELL*0.47); ctx.fill();
         ctx.shadowBlur = 0;
         const eyeOff = 4, eyeR = 2.5;
@@ -1047,6 +999,13 @@ function loop() {
         ctx.shadowBlur = 6; ctx.shadowColor = p.color;
         ctx.fillStyle = isMe ? '#fff' : 'rgba(255,255,255,0.75)';
         ctx.fillText(p.name.toUpperCase(), cx2 + CELL/2, cy2 - 4);
+        // Waitlist badge sul serpente
+        if (tournamentInfo.phase === 'registration' && p.inTournamentWaitlist) {
+          ctx.font = '9px "Share Tech Mono"';
+          ctx.fillStyle = '#ffdd00';
+          ctx.shadowColor = '#ffdd00';
+          ctx.fillText('★', cx2 + CELL/2, cy2 - 14);
+        }
       } else {
         const brightness = 0.4 + 0.6 * (1 - pct);
         ctx.shadowBlur = 4; ctx.shadowColor = p.color;
@@ -1059,7 +1018,7 @@ function loop() {
   }
   ctx.restore();
 
-  // HUD
+  // HUD stats
   if (me) {
     document.getElementById('lenNum').textContent = me.body ? me.body.length : 0;
     document.getElementById('scoreNum').textContent = me.score || 0;
@@ -1105,8 +1064,7 @@ function loop() {
 
   // Minimap
   const mw = minimap.width, mh = minimap.height;
-  mCtx.fillStyle = 'rgba(7,13,10,0.9)';
-  mCtx.fillRect(0,0,mw,mh);
+  mCtx.fillStyle = 'rgba(7,13,10,0.9)'; mCtx.fillRect(0,0,mw,mh);
   const sx = mw/GRID, sy = mh/GRID;
   for (const f of gameState.food) { mCtx.fillStyle = f.value>1?'#ffdd00':'#00ff88'; mCtx.fillRect(f.x*sx, f.y*sy, sx, sy); }
   for (const p of gameState.players) {
@@ -1116,8 +1074,7 @@ function loop() {
       mCtx.fillRect(p.body[i].x*sx, p.body[i].y*sy, sx, sy);
     }
   }
-  mCtx.strokeStyle = 'rgba(0,255,136,0.4)';
-  mCtx.lineWidth = 1;
+  mCtx.strokeStyle = 'rgba(0,255,136,0.4)'; mCtx.lineWidth = 1;
   mCtx.strokeRect(camX/CELL*sx, camY/CELL*sy, canvas.width/CELL*sx, canvas.height/CELL*sy);
 }
 
