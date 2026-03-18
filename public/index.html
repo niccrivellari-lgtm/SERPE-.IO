@@ -79,7 +79,7 @@ body::after{
 .ctrl{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:0.6rem;color:rgba(0,255,136,0.4);letter-spacing:0.1em;}
 .ctrl span{color:var(--g);}
 
-/* ── TOURNAMENT COUNTDOWN BOX ── */
+/* ── TOURNAMENT COUNTDOWN BOX (lobby) ── */
 #tournamentCountdownBox{
   display:none;
   background:rgba(255,221,0,0.04);border:1px solid rgba(255,221,0,0.35);
@@ -99,7 +99,7 @@ body::after{
 #tcb-status{font-size:0.55rem;letter-spacing:0.12em;margin-top:8px;}
 #tcb-registered{font-size:0.58rem;color:rgba(255,221,0,0.6);letter-spacing:0.1em;margin-top:6px;}
 
-/* ── WINNER BOARD (lobby, post torneo) ── */
+/* ── WINNER BOARD (lobby, post-torneo) ── */
 #winnerBoardBox{
   display:none;
   background:rgba(255,221,0,0.03);border:1px solid rgba(255,221,0,0.5);
@@ -170,6 +170,36 @@ body::after{
 .hpanel .val{font-family:'Press Start 2P',monospace;font-size:0.9rem;color:var(--g);margin-top:4px;}
 .lbl{color:rgba(0,255,136,0.45);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;}
 
+/* ── TOURNAMENT PRE-START COUNTDOWN OVERLAY (10 secondi drammatici) ── */
+#tournamentCountdownOverlay{
+  display:none;position:fixed;inset:0;z-index:5000;
+  background:rgba(7,13,10,0.97);
+  align-items:center;justify-content:center;flex-direction:column;gap:24px;
+  backdrop-filter:blur(12px);
+}
+#tournamentCountdownOverlay.open{display:flex;}
+.tco-top{font-family:'Press Start 2P',monospace;font-size:0.65rem;color:rgba(255,221,0,0.6);letter-spacing:0.35em;text-transform:uppercase;text-align:center;}
+.tco-mode{font-family:'Press Start 2P',monospace;font-size:clamp(1rem,3vw,1.6rem);color:var(--y);text-align:center;text-shadow:0 0 30px rgba(255,221,0,0.7);margin-bottom:4px;}
+.tco-players{font-size:0.65rem;color:rgba(0,255,136,0.5);letter-spacing:0.2em;text-align:center;}
+.tco-vs{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:400px;}
+.tco-vs-pill{padding:6px 14px;border:1px solid rgba(0,255,136,0.25);font-size:0.6rem;letter-spacing:0.1em;background:rgba(0,255,136,0.05);}
+.tco-num{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(5rem,18vw,10rem);
+  line-height:1;
+  text-align:center;
+  text-shadow:0 0 60px currentColor, 0 0 120px currentColor;
+  animation:tcoPulse 0.8s ease-in-out infinite;
+  transition:color 0.3s;
+}
+@keyframes tcoPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.06);}
+}
+.tco-go{font-family:'Press Start 2P',monospace;font-size:clamp(2rem,8vw,5rem);color:var(--g);text-shadow:0 0 60px var(--g),0 0 120px var(--g);animation:goAnim 0.4s ease-out;}
+@keyframes goAnim{from{transform:scale(2);opacity:0;}to{transform:scale(1);opacity:1;}}
+.tco-sub{font-size:0.7rem;color:rgba(0,255,136,0.5);letter-spacing:0.25em;text-align:center;}
+
 /* Waitlist badge in-game */
 #waitlistBadge{
   display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
@@ -181,6 +211,7 @@ body::after{
 #waitlistBadge .wl-count{font-size:0.5rem;color:rgba(255,221,0,0.4);margin-top:2px;}
 #waitlistBadge .wl-status{font-size:0.5rem;margin-top:2px;letter-spacing:0.1em;}
 
+/* Tournament active HUD */
 #tournamentHUD{
   display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
   background:rgba(7,13,10,0.9);border:1px solid var(--y);
@@ -247,7 +278,6 @@ body::after{
   <h1>🐍 SERPE<br>.IO</h1>
   <p class="tagline">Multiplayer Chaos · Lobby Globale · Real-Time</p>
 
-  <!-- Tournament countdown / registration box -->
   <div id="tournamentCountdownBox">
     <div id="tcb-label">🏆 PROSSIMO TORNEO</div>
     <div id="tcb-mode"></div>
@@ -257,7 +287,6 @@ body::after{
     <div id="tcb-registered" style="display:none"></div>
   </div>
 
-  <!-- Winner board post-torneo -->
   <div id="winnerBoardBox">
     <div id="wbb-title">🏆 CLASSIFICA FINALE</div>
     <div id="wbb-mode"></div>
@@ -327,7 +356,7 @@ body::after{
 <div id="gameWrap">
   <canvas id="gameCanvas"></canvas>
 
-  <!-- Waitlist HUD (durante registration, in-game) -->
+  <!-- Waitlist HUD (durante registration) -->
   <div id="waitlistBadge">
     <div class="wl-label">🏆 TORNEO TRA</div>
     <div class="wl-timer" id="wlTimer">--:--</div>
@@ -361,6 +390,16 @@ body::after{
   <div id="killfeed"></div>
 </div>
 
+<!-- TOURNAMENT PRE-START COUNTDOWN OVERLAY (10 secondi) -->
+<div id="tournamentCountdownOverlay">
+  <div class="tco-top">🏆 IL TORNEO STA PER INIZIARE</div>
+  <div class="tco-mode" id="tco-mode">SURVIVAL</div>
+  <div class="tco-players" id="tco-players">VS</div>
+  <div class="tco-vs" id="tco-vs"></div>
+  <div class="tco-num" id="tco-num" style="color:var(--y);">10</div>
+  <div class="tco-sub" id="tco-sub">PREPARATI!</div>
+</div>
+
 <!-- WINNER OVERLAY (in-game) -->
 <div id="winnerOverlay">
   <div class="winner-trophy">🏆</div>
@@ -389,7 +428,11 @@ body::after{
 let GRID = 40, CELL = 20;
 let myId = null, ws = null;
 let gameState = null, prevState = null;
-let tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0, registeredCount: 0 };
+let tournamentInfo = {
+  phase: 'normal', scheduledAt: 0, registrationAt: 0,
+  countdownEndsAt: 0, gameEndsAt: 0,
+  winnerBoard: [], winnerBoardExpiresAt: 0, registeredCount: 0
+};
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -403,6 +446,61 @@ function resize() {
 }
 resize();
 window.addEventListener('resize', resize);
+
+// ──────────────────────────────────────────────────────────────
+//  TOURNAMENT PRE-START COUNTDOWN OVERLAY (10 secondi)
+// ──────────────────────────────────────────────────────────────
+let countdownOverlayInterval = null;
+
+function showTournamentCountdownOverlay() {
+  const overlay = document.getElementById('tournamentCountdownOverlay');
+  const numEl = document.getElementById('tco-num');
+  const subEl = document.getElementById('tco-sub');
+  const modeEl = document.getElementById('tco-mode');
+  const playersEl = document.getElementById('tco-players');
+  const vsEl = document.getElementById('tco-vs');
+
+  modeEl.textContent = tournamentInfo.mode === 'survival' ? '💀 MODALITÀ SURVIVAL' : '📏 MODALITÀ LUNGHEZZA';
+
+  // Mostra i giocatori iscritti
+  if (gameState) {
+    const names = gameState.players.map(p => p.name);
+    playersEl.textContent = `${names.length} COMBATTENTI`;
+    vsEl.innerHTML = names.map(n =>
+      `<span class="tco-vs-pill" style="color:${gameState.players.find(p=>p.name===n)?.color||'var(--g)'}">${n.toUpperCase()}</span>`
+    ).join('');
+  }
+
+  overlay.classList.add('open');
+
+  const endAt = tournamentInfo.countdownEndsAt || (Date.now() + 10000);
+
+  if (countdownOverlayInterval) clearInterval(countdownOverlayInterval);
+  countdownOverlayInterval = setInterval(() => {
+    const rem = Math.ceil((endAt - Date.now()) / 1000);
+    if (rem > 0) {
+      numEl.textContent = rem;
+      numEl.style.color = rem <= 3 ? 'var(--r)' : rem <= 5 ? 'var(--y)' : 'var(--g)';
+      numEl.style.textShadow = `0 0 60px ${rem <= 3 ? 'var(--r)' : rem <= 5 ? 'var(--y)' : 'var(--g)'}, 0 0 120px currentColor`;
+      subEl.textContent = rem <= 3 ? '⚡ VAI! VAI! VAI!' : rem <= 5 ? '🔥 CI SIAMO QUASI!' : '🐍 PREPARATI!';
+    } else {
+      // GO!
+      numEl.style.display = 'none';
+      subEl.style.display = 'none';
+      const go = document.createElement('div');
+      go.className = 'tco-go';
+      go.textContent = 'GO!';
+      overlay.appendChild(go);
+      clearInterval(countdownOverlayInterval);
+      setTimeout(() => {
+        overlay.classList.remove('open');
+        numEl.style.display = '';
+        subEl.style.display = '';
+        go.remove();
+      }, 800);
+    }
+  }, 100);
+}
 
 // ──────────────────────────────────────────────────────────────
 //  LOBBY TOURNAMENT COUNTDOWN
@@ -449,7 +547,7 @@ function updateLobbyCountdown() {
     const tcbStatus = document.getElementById('tcb-status');
     const tcbRegistered = document.getElementById('tcb-registered');
 
-    if (phase === 'active') {
+    if (phase === 'active' || phase === 'countdown') {
       document.getElementById('tcb-label').textContent = '🏆 TORNEO IN CORSO';
       document.getElementById('tcb-timer').textContent = 'IN CORSO!';
       tcbStatus.textContent = '🔒 Accesso bloccato per non iscritti';
@@ -462,7 +560,6 @@ function updateLobbyCountdown() {
     }
 
     if (phase === 'registration') {
-      // Finestra aperta: si può entrare e ci si iscrive automaticamente
       document.getElementById('tcb-label').textContent = '🏆 REGISTRAZIONE APERTA!';
       tcbStatus.textContent = '✅ Entra ora per partecipare al torneo!';
       tcbStatus.style.color = 'var(--g)';
@@ -479,7 +576,6 @@ function updateLobbyCountdown() {
     // phase === scheduled
     const remToReg = tournamentInfo.registrationAt - now;
     if (remToReg > 0) {
-      // Ancora lontano dalla registrazione: countdown all'apertura registrazione
       document.getElementById('tcb-label').textContent = '🏆 PROSSIMO TORNEO';
       tcbStatus.textContent = `Registrazione apre tra ${fmtTime(remToReg)}`;
       tcbStatus.style.color = 'rgba(255,221,0,0.5)';
@@ -487,12 +583,11 @@ function updateLobbyCountdown() {
       joinBtn.disabled = false;
       joinBtn.textContent = '▶ ENTRA IN PARTITA';
       const rem = Math.max(0, tournamentInfo.scheduledAt - now);
-      const h = Math.floor(rem / 3600000), m = Math.floor((rem % 3600000) / 60000), s = Math.floor((rem % 60000) / 1000);
+      const h = Math.floor(rem / 3600000), m2 = Math.floor((rem % 3600000) / 60000), s = Math.floor((rem % 60000) / 1000);
       document.getElementById('tcb-timer').textContent = h > 0
-        ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-        : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        ? `${String(h).padStart(2,'0')}:${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+        : `${String(m2).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     } else {
-      // Siamo nei 30 min ma phase non aggiornata ancora: aggiorna visuale
       document.getElementById('tcb-label').textContent = '🏆 REGISTRAZIONE APERTA!';
       tcbStatus.textContent = '✅ Entra ora per partecipare al torneo!';
       tcbStatus.style.color = 'var(--g)';
@@ -560,7 +655,8 @@ function verifyCode() {
     setTimeout(() => { adminError.style.display = 'none'; }, 2000); return;
   }
   stepCode.style.display = 'none';
-  if (tournamentInfo.phase !== 'normal') showCancelForm(); else showScheduleForm();
+  const hasActive = tournamentInfo.phase !== 'normal' && tournamentInfo.phase !== 'ended';
+  if (hasActive) showCancelForm(); else showScheduleForm();
 }
 function showScheduleForm() {
   scheduleForm.style.display = 'flex'; cancelForm.style.display = 'none';
@@ -609,7 +705,7 @@ function sendAdminMsg(msgObj) {
         if (msg.tournament) { tournamentInfo = msg.tournament; updateLobbyCountdown(); }
       }
       if (msg.type === 'tournament_cancelled') {
-        tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+        tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, countdownEndsAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
         updateLobbyCountdown();
       }
     } catch {}
@@ -628,6 +724,7 @@ function showWinnerOverlay(msg) {
   document.getElementById('winnerName').style.color = msg.winnerColor || '#ffdd00';
   document.getElementById('winnerSub').textContent = msg.mode === 'survival'
     ? 'è l\'ultimo sopravvissuto! 💀' : 'era il serpente più lungo! 📏';
+
   if (msg.winnerBoard && msg.winnerBoard.length > 0) {
     document.getElementById('winnerBoardInGame').style.display = 'block';
     const rankLabels = ['🥇','🥈','🥉'];
@@ -645,17 +742,20 @@ function showWinnerOverlay(msg) {
   const t = setInterval(() => {
     countdown--;
     counter.textContent = `ritorno alla home tra ${countdown}s...`;
-    if (countdown <= 0) { clearInterval(t); overlay.classList.remove('open'); if (ws) ws.close(); }
+    if (countdown <= 0) {
+      clearInterval(t);
+      overlay.classList.remove('open');
+      if (ws) ws.close();
+    }
   }, 1000);
 }
 
 // ──────────────────────────────────────────────────────────────
 //  AUTO-CANCEL NOTICE
 // ──────────────────────────────────────────────────────────────
-function showAutoCancelNotice(reason, registeredCount) {
+function showAutoCancelNotice(registeredCount) {
   const notice = document.getElementById('autoCancelNotice');
-  const subEl = document.getElementById('acnSub');
-  subEl.textContent = registeredCount <= 1
+  document.getElementById('acnSub').textContent = registeredCount <= 1
     ? `Solo ${registeredCount} giocatore iscritto — servono almeno 2!`
     : 'Iscritti insufficienti per il torneo.';
   notice.classList.add('open');
@@ -723,8 +823,8 @@ function joinGame() {
     nameErr.style.display = 'block'; document.getElementById('nameInput').focus();
     setTimeout(() => { nameErr.style.display = 'none'; }, 2500); return;
   }
-  // Solo durante torneo ATTIVO non si può entrare
-  if (tournamentInfo.phase === 'active') {
+  // Blocco solo durante torneo ATTIVO o COUNTDOWN
+  if (tournamentInfo.phase === 'active' || tournamentInfo.phase === 'countdown') {
     alert('🔒 Torneo in corso — non sei iscritto, aspetta la fine!'); return;
   }
 
@@ -750,9 +850,6 @@ function joinGame() {
       ws.close();
       if (msg.reason === 'no_name') alert('⚠ Inserisci un nome!');
       else if (msg.reason === 'tournament_active') alert('🔒 Torneo in corso e non sei iscritto. Attendi la fine del torneo!');
-      else if (msg.reason === 'tournament_active_not_registered') {
-        // Espulso perché non era in lista — vai alla lobby
-      }
     }
 
     if (msg.type === 'state') {
@@ -768,21 +865,27 @@ function joinGame() {
 
     if (msg.type === 'tournament_registration_open') {
       if (msg.tournament) tournamentInfo = msg.tournament;
-      // Mostra notifica all'utente che è stato iscritto automaticamente
       addKillFeed('🏆 REGISTRAZIONE APERTA', '#ffdd00', 'Sei in lista d\'attesa!', '#00ff88');
+    }
+
+    // ── COUNTDOWN 10 SECONDI DRAMMATICI ──
+    if (msg.type === 'tournament_countdown') {
+      if (msg.tournament) tournamentInfo = msg.tournament;
+      showTournamentCountdownOverlay();
     }
 
     if (msg.type === 'tournament_start') {
       if (msg.tournament) tournamentInfo = msg.tournament;
+      // Overlay countdown si chiude da solo, il gioco parte
     }
 
     if (msg.type === 'tournament_cancelled') {
-      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, countdownEndsAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
     }
 
     if (msg.type === 'tournament_auto_cancelled') {
-      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
-      showAutoCancelNotice(msg.reason, msg.registeredCount);
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, countdownEndsAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+      showAutoCancelNotice(msg.registeredCount);
     }
 
     if (msg.type === 'tournament_end') {
@@ -796,19 +899,19 @@ function joinGame() {
     }
 
     if (msg.type === 'tournament_reset') {
-      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
+      // Torneo finito, tutti tornano al gioco libero — nessuna disconnessione
+      tournamentInfo = { phase: 'normal', scheduledAt: 0, registrationAt: 0, countdownEndsAt: 0, gameEndsAt: 0, winnerBoard: [], winnerBoardExpiresAt: 0 };
       document.getElementById('tournamentHUD').style.display = 'none';
       document.getElementById('waitlistBadge').style.display = 'none';
-    }
-
-    if (msg.type === 'tournament_status') {
-      // Solo dal check iniziale, non siamo in gioco
+      document.getElementById('winnerOverlay').classList.remove('open');
+      // Già in partita, continuano a giocare normalmente
     }
   };
 
-  ws.onclose = e => {
+  ws.onclose = () => {
     document.getElementById('gameWrap').style.display = 'none';
     document.getElementById('winnerOverlay').classList.remove('open');
+    document.getElementById('tournamentCountdownOverlay').classList.remove('open');
     document.getElementById('lobby').style.display = 'flex';
     document.getElementById('waitlistBadge').style.display = 'none';
     gameState = null; prevState = null; myId = null;
@@ -816,7 +919,7 @@ function joinGame() {
   };
 }
 
-// Polling iniziale stato torneo
+// Polling iniziale stato torneo dalla lobby
 (function checkTournamentStatus() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const checkWs = new WebSocket(`${proto}://${location.host}`);
@@ -882,12 +985,10 @@ function updateWaitlistBadge() {
   if (tournamentInfo.phase === 'registration') {
     badge.style.display = 'block';
     document.getElementById('tournamentHUD').style.display = 'none';
-
     const rem = Math.max(0, tournamentInfo.scheduledAt - Date.now());
     const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
     document.getElementById('wlTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     document.getElementById('wlCount').textContent = `${tournamentInfo.registeredCount || 0} iscritti`;
-
     const inList = me && me.inTournamentWaitlist;
     const statusEl = document.getElementById('wlStatus');
     statusEl.textContent = inList ? '✅ SEI IN LISTA D\'ATTESA' : '⏳ NON ISCRITTO';
@@ -999,7 +1100,6 @@ function loop() {
         ctx.shadowBlur = 6; ctx.shadowColor = p.color;
         ctx.fillStyle = isMe ? '#fff' : 'rgba(255,255,255,0.75)';
         ctx.fillText(p.name.toUpperCase(), cx2 + CELL/2, cy2 - 4);
-        // Waitlist badge sul serpente
         if (tournamentInfo.phase === 'registration' && p.inTournamentWaitlist) {
           ctx.font = '9px "Share Tech Mono"';
           ctx.fillStyle = '#ffdd00';
@@ -1042,24 +1142,32 @@ function loop() {
     }
   } else { dead.style.display = 'none'; }
 
-  // Leaderboard
+  // Leaderboard in-game
   const isTournament = tournamentInfo.phase === 'active';
   document.getElementById('boardTitle').textContent = isTournament
     ? (tournamentInfo.mode === 'survival' ? '💀 SURVIVAL' : '📏 LUNGHEZZA') : '🏆 CLASSIFICA';
   let sorted;
   if (isTournament && tournamentInfo.mode === 'survival') {
-    sorted = [...gameState.players].sort((a,b) => { if(a.alive&&!b.alive)return -1; if(!a.alive&&b.alive)return 1; return (b.kills||0)-(a.kills||0); }).slice(0,8);
+    // Vivi prima (per kills), poi morti (eliminati dopo = posizione migliore = eliminationRank più alto)
+    sorted = [...gameState.players].sort((a,b) => {
+      if (a.alive && !b.alive) return -1;
+      if (!a.alive && b.alive) return 1;
+      if (a.alive && b.alive) return (b.tournamentKills||0) - (a.tournamentKills||0);
+      return (b.tournamentEliminationRank||0) - (a.tournamentEliminationRank||0);
+    }).slice(0,8);
   } else if (isTournament && tournamentInfo.mode === 'length') {
     sorted = [...gameState.players].sort((a,b) => (b.tournamentMaxLength||0)-(a.tournamentMaxLength||0)).slice(0,8);
   } else {
     sorted = [...gameState.players].sort((a,b) => (b.score||0)-(a.score||0)).slice(0,8);
   }
-  document.getElementById('boardRows').innerHTML = sorted.map(p => {
+  document.getElementById('boardRows').innerHTML = sorted.map((p,i) => {
     let stat;
     if (isTournament && tournamentInfo.mode === 'survival') stat = p.alive ? '✅' : '💀';
     else if (isTournament && tournamentInfo.mode === 'length') stat = `${p.tournamentMaxLength||3}L`;
     else stat = `${p.score||0}pt`;
-    return `<div class="brow"><span class="bname ${p.id===myId?'bme':''}" style="color:${p.color}">${p.name.toUpperCase()}</span><span class="bscore">${stat}</span></div>`;
+    const rankNum = i + 1;
+    const rankMedal = rankNum === 1 ? '🥇' : rankNum === 2 ? '🥈' : rankNum === 3 ? '🥉' : `#${rankNum}`;
+    return `<div class="brow"><span class="bname ${p.id===myId?'bme':''}" style="color:${p.color}">${rankMedal} ${p.name.toUpperCase()}</span><span class="bscore">${stat}</span></div>`;
   }).join('');
 
   // Minimap
