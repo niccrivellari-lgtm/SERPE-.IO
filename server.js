@@ -10,9 +10,9 @@ const FOOD_COUNT = 12;
 const RESPAWN_MS = 3000;
 
 const ADMIN_CODE = '479572';
-const PRE_EXPULSION_MS = 30 * 60 * 1000;      // 30 min prima → espulsione
-const TOURNAMENT_DURATION_MS = 10 * 60 * 1000; // durata torneo lunghezza
-const WINNER_BOARD_MS = 15 * 60 * 1000;        // classifica finale 15 min
+const PRE_REGISTRATION_MS = 30 * 60 * 1000; // 30 min prima → apre registrazione
+const TOURNAMENT_DURATION_MS = 10 * 60 * 1000;
+const WINNER_BOARD_MS = 15 * 60 * 1000;
 
 // ── HTTP ──────────────────────────────────────────────────────
 const server = http.createServer((req, res) => {
@@ -48,15 +48,23 @@ function buildOccupied() {
 }
 
 // ── Tournament State ──────────────────────────────────────────
-// phase: 'normal' | 'scheduled' | 'expelling' | 'active' | 'ended'
+// phase: 'normal' | 'scheduled' | 'registration' | 'active' | 'ended'
+//
+// FLUSSO:
+//  normal → (admin schedula) → scheduled
+//  scheduled → (30 min prima) → registration  [gioco normale continua, ci si iscrive]
+//  registration → (ora X) → active            [solo iscritti giocano, ≤1 = annullato]
+//  active → (fine / 0 giocatori) → ended
+//  ended → (15 min) → normal
 let tournament = {
   phase: 'normal',
   mode: null,
   scheduledAt: 0,
-  expulsionAt: 0,
+  registrationAt: 0,
   gameEndsAt: 0,
   winnerBoard: [],
   winnerBoardExpiresAt: 0,
+  registeredIds: new Set(),
   _timers: []
 };
 
@@ -92,7 +100,8 @@ function createSnake(id, name) {
     dir: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 },
     alive: true, kills: 0, deaths: 0,
     respawnAt: 0, ws: null, score: 0,
-    tournamentKills: 0, tournamentMaxLength: 3
+    tournamentKills: 0, tournamentMaxLength: 3,
+    inTournamentWaitlist: false
   };
 }
 
@@ -103,7 +112,8 @@ function serializePlayer(p) {
     kills: p.kills, deaths: p.deaths,
     score: p.score, respawnAt: p.respawnAt,
     dir: p.dir, tournamentKills: p.tournamentKills,
-    tournamentMaxLength: p.tournamentMaxLength
+    tournamentMaxLength: p.tournamentMaxLength,
+    inTournamentWaitlist: p.inTournamentWaitlist
   };
 }
 
@@ -112,10 +122,11 @@ function getTournamentInfo() {
     phase: tournament.phase,
     mode: tournament.mode,
     scheduledAt: tournament.scheduledAt,
-    expulsionAt: tournament.expulsionAt,
+    registrationAt: tournament.registrationAt,
     gameEndsAt: tournament.gameEndsAt,
     winnerBoard: tournament.winnerBoard,
-    winnerBoardExpiresAt: tournament.winnerBoardExpiresAt
+    winnerBoardExpiresAt: tournament.winnerBoardExpiresAt,
+    registeredCount: tournament.registeredIds.size
   };
 }
 
@@ -134,32 +145,39 @@ wss.on('connection', ws => {
     if (msg.type === 'join') {
       const name = (msg.name || '').trim();
 
-      // Nome obbligatorio
+      // Check anonimo (polling stato torneo dalla lobby)
+      if (name === '__check__') {
+        ws.send(JSON.stringify({ type: 'tournament_status', tournament: getTournamentInfo() }));
+        return;
+      }
+
       if (!name) {
         ws.send(JSON.stringify({ type: 'join_rejected', reason: 'no_name' }));
         return;
       }
 
-      // Torneo attivo: nessun ingresso
+      // Torneo ATTIVO: solo iscritti possono entrare, gli altri aspettano
       if (tournament.phase === 'active') {
         ws.send(JSON.stringify({ type: 'join_rejected', reason: 'tournament_active' }));
         return;
       }
 
+      // In tutte le altre fasi (normal, scheduled, registration, ended) si può giocare
       const p = createSnake(id, name);
       p.ws = ws;
       players[id] = p;
+
+      // Fase registration → auto-iscrizione alla lista d'attesa
+      if (tournament.phase === 'registration') {
+        p.inTournamentWaitlist = true;
+        tournament.registeredIds.add(id);
+        console.log(`[TORNEO] Auto-iscritto alla waitlist: ${name} (totale: ${tournament.registeredIds.size})`);
+      }
 
       ws.send(JSON.stringify({
         type: 'init', id, grid: GRID,
         tournament: getTournamentInfo()
       }));
-
-      // Se siamo in fase expelling: espelli subito anche questo
-      if (tournament.phase === 'expelling') {
-        try { ws.close(1000, 'tournament_expulsion'); } catch {}
-        delete players[id];
-      }
     }
 
     // ── DIR ───────────────────────────────────────────────────
@@ -182,7 +200,7 @@ wss.on('connection', ws => {
       }
       const scheduledAt = Number(msg.scheduledAt);
       if (!scheduledAt || scheduledAt <= Date.now() + 60000) {
-        ws.send(JSON.stringify({ type: 'admin_error', msg: 'Orario non valido (deve essere almeno 1 minuto nel futuro)!' })); return;
+        ws.send(JSON.stringify({ type: 'admin_error', msg: 'Orario non valido!' })); return;
       }
       scheduleTournament(msg.mode, scheduledAt);
       ws.send(JSON.stringify({ type: 'admin_ok', scheduledAt }));
@@ -204,8 +222,18 @@ wss.on('connection', ws => {
     }
   });
 
-  ws.on('close', () => { delete players[id]; });
-  ws.on('error', () => { delete players[id]; });
+  ws.on('close', () => {
+    if (players[id]) {
+      tournament.registeredIds.delete(id);
+      delete players[id];
+    }
+  });
+  ws.on('error', () => {
+    if (players[id]) {
+      tournament.registeredIds.delete(id);
+      delete players[id];
+    }
+  });
 });
 
 // ── Tournament Logic ──────────────────────────────────────────
@@ -216,27 +244,25 @@ function scheduleTournament(mode, scheduledAt) {
   tournament.phase = 'scheduled';
   tournament.mode = mode;
   tournament.scheduledAt = scheduledAt;
-  tournament.expulsionAt = scheduledAt - PRE_EXPULSION_MS;
+  tournament.registrationAt = scheduledAt - PRE_REGISTRATION_MS;
   tournament.gameEndsAt = 0;
   tournament.winnerBoard = [];
   tournament.winnerBoardExpiresAt = 0;
+  tournament.registeredIds = new Set();
 
-  broadcast({ type: 'tournament_scheduled', ...getTournamentInfo() });
+  broadcast({ type: 'tournament_scheduled', tournament: getTournamentInfo() });
 
-  const msToExpulsion = tournament.expulsionAt - now;
+  const msToRegistration = tournament.registrationAt - now;
   const msToStart = scheduledAt - now;
 
-  // Timer espulsione
-  if (msToExpulsion > 0) {
-    addTimer(() => startExpulsion(), msToExpulsion);
+  if (msToRegistration > 0) {
+    addTimer(() => openRegistration(), msToRegistration);
   } else {
-    // Già nel finestra 30-min: espelli subito
-    setTimeout(() => startExpulsion(), 100);
+    // Già nella finestra dei 30 min → apri registrazione subito
+    setTimeout(() => openRegistration(), 100);
   }
 
-  // Timer inizio
   addTimer(() => startTournamentActive(), msToStart);
-
   console.log(`[TORNEO] Programmato "${mode}" per ${new Date(scheduledAt).toLocaleString('it-IT')}`);
 }
 
@@ -245,46 +271,75 @@ function cancelTournament() {
   tournament.phase = 'normal';
   tournament.mode = null;
   tournament.scheduledAt = 0;
-  tournament.expulsionAt = 0;
+  tournament.registrationAt = 0;
   tournament.winnerBoard = [];
   tournament.winnerBoardExpiresAt = 0;
+  tournament.registeredIds = new Set();
+  for (const p of Object.values(players)) p.inTournamentWaitlist = false;
   broadcast({ type: 'tournament_cancelled' });
   console.log('[TORNEO] Cancellato.');
 }
 
-function startExpulsion() {
+// Apre la finestra di registrazione (30 min prima del torneo)
+// Il gioco normale continua — chi è dentro viene auto-iscritto,
+// chi entra ora viene iscritto automaticamente
+function openRegistration() {
   if (tournament.phase !== 'scheduled') return;
-  tournament.phase = 'expelling';
-  console.log('[TORNEO] Espulsione giocatori (30 min al via)');
+  tournament.phase = 'registration';
 
-  // Notifica tutti prima di chiudere
-  broadcast({ type: 'tournament_expulsion', scheduledAt: tournament.scheduledAt });
-
-  // Chiudi tutte le connessioni
+  // Chi è già connesso: auto-iscritto
   for (const p of Object.values(players)) {
-    if (p.ws && p.ws.readyState === 1) {
-      try { p.ws.close(1000, 'tournament_expulsion'); } catch {}
-    }
+    p.inTournamentWaitlist = true;
+    tournament.registeredIds.add(p.id);
   }
+
+  broadcast({ type: 'tournament_registration_open', tournament: getTournamentInfo() });
+  console.log(`[TORNEO] Registrazione aperta. Iscritti auto: ${tournament.registeredIds.size}`);
 }
 
 function startTournamentActive() {
-  if (tournament.phase !== 'expelling' && tournament.phase !== 'scheduled') return;
+  if (tournament.phase !== 'registration' && tournament.phase !== 'scheduled') return;
+
+  const waitlisted = [...tournament.registeredIds];
+
+  // ≤1 iscritto → annullamento automatico, si torna al gioco normale
+  if (waitlisted.length <= 1) {
+    console.log(`[TORNEO] Annullato: solo ${waitlisted.length} iscritto/i.`);
+    broadcast({
+      type: 'tournament_auto_cancelled',
+      reason: 'not_enough_players',
+      registeredCount: waitlisted.length
+    });
+    resetToNormal();
+    return;
+  }
+
   tournament.phase = 'active';
   tournament.gameEndsAt = tournament.mode === 'length' ? Date.now() + TOURNAMENT_DURATION_MS : 0;
 
-  // Sicurezza: chiudi chiunque fosse rimasto
+  // Espelli chi NON era iscritto
   for (const p of Object.values(players)) {
-    if (p.ws && p.ws.readyState === 1) {
-      try { p.ws.close(1000, 'tournament_active'); } catch {}
+    if (!waitlisted.includes(p.id)) {
+      if (p.ws && p.ws.readyState === 1) {
+        try { p.ws.close(1000, 'tournament_active'); } catch {}
+      }
+      delete players[p.id];
     }
   }
-  players = {};
 
+  // Reset campo e stats per gli iscritti
   food = [];
   spawnFood();
+  for (const p of Object.values(players)) {
+    const head = randCell(pos => buildOccupied().has(`${pos.x},${pos.y}`));
+    p.body = [head, { x: head.x - 1, y: head.y }, { x: head.x - 2, y: head.y }];
+    p.dir = { x: 1, y: 0 }; p.nextDir = { x: 1, y: 0 };
+    p.alive = true; p.score = 0;
+    p.tournamentKills = 0; p.tournamentMaxLength = 3;
+  }
 
-  console.log(`[TORNEO] INIZIATO! Modalità: ${tournament.mode}`);
+  broadcast({ type: 'tournament_start', tournament: getTournamentInfo() });
+  console.log(`[TORNEO] INIZIATO! Modalità: ${tournament.mode}, giocatori: ${Object.keys(players).length}`);
 
   if (tournament.mode === 'length') {
     addTimer(() => endTournament(), TOURNAMENT_DURATION_MS);
@@ -318,7 +373,6 @@ function endTournament() {
   tournament.winnerBoardExpiresAt = Date.now() + WINNER_BOARD_MS;
 
   const winner = sorted[0] || null;
-
   broadcast({
     type: 'tournament_end',
     winnerName: winner ? winner.name : null,
@@ -330,7 +384,7 @@ function endTournament() {
 
   console.log(`[TORNEO] FINITO! Vincitore: ${winner ? winner.name : '???'}`);
 
-  // Reset dopo 15 min
+  // Reset a normale dopo 15 min
   addTimer(() => resetToNormal(), WINNER_BOARD_MS);
 }
 
@@ -339,23 +393,26 @@ function resetToNormal() {
   tournament.phase = 'normal';
   tournament.mode = null;
   tournament.scheduledAt = 0;
-  tournament.expulsionAt = 0;
+  tournament.registrationAt = 0;
   tournament.gameEndsAt = 0;
   tournament.winnerBoard = [];
   tournament.winnerBoardExpiresAt = 0;
+  tournament.registeredIds = new Set();
 
+  // Tutti i connessi tornano al gioco classico
   for (const p of Object.values(players)) {
     const head = randCell(pos => buildOccupied().has(`${pos.x},${pos.y}`));
     p.body = [head, { x: head.x - 1, y: head.y }, { x: head.x - 2, y: head.y }];
     p.dir = { x: 1, y: 0 }; p.nextDir = { x: 1, y: 0 };
     p.alive = true; p.kills = 0; p.deaths = 0; p.score = 0;
     p.tournamentKills = 0; p.tournamentMaxLength = 3;
+    p.inTournamentWaitlist = false;
   }
 
   food = [];
   spawnFood();
   broadcast({ type: 'tournament_reset' });
-  console.log('[TORNEO] Reset a normale.');
+  console.log('[TORNEO] Reset a gioco normale.');
 }
 
 // ── Broadcast ─────────────────────────────────────────────────
@@ -366,23 +423,27 @@ function broadcast(data) {
   }
 }
 
-// ── Game tick ─────────────────────────────────────────────────
+// ── Game Tick ─────────────────────────────────────────────────
 setInterval(() => {
   const now = Date.now();
 
-  // Fasi non-gioco
-  if (['scheduled', 'expelling'].includes(tournament.phase)) {
+  // scheduled / registration: gioco normale continua (players si muovono)
+  // ended: nessun movimento, solo broadcast per mostrare overlay
+  if (tournament.phase === 'ended') {
     if (Object.keys(players).length > 0) {
-      broadcast({
-        type: 'state',
-        players: Object.values(players).map(serializePlayer),
-        food, tournament: getTournamentInfo()
-      });
+      broadcast({ type: 'state', players: Object.values(players).map(serializePlayer), food, tournament: getTournamentInfo() });
     }
     return;
   }
 
-  // Respawn
+  // Auto-chiusura se torneo attivo e 0 giocatori
+  if (tournament.phase === 'active' && Object.keys(players).length === 0) {
+    console.log('[TORNEO] Nessun giocatore — torneo chiuso automaticamente.');
+    endTournament();
+    return;
+  }
+
+  // Respawn (non in survival attivo)
   for (const p of Object.values(players)) {
     if (!p.alive && now >= p.respawnAt) {
       if (tournament.phase === 'active' && tournament.mode === 'survival') continue;
