@@ -13,6 +13,7 @@ const ADMIN_CODE = '479572';
 const PRE_REGISTRATION_MS = 30 * 60 * 1000; // 30 min prima → apre registrazione
 const TOURNAMENT_DURATION_MS = 10 * 60 * 1000;
 const WINNER_BOARD_MS = 15 * 60 * 1000;
+const TOURNAMENT_COUNTDOWN_MS = 10 * 1000; // 10s schermata di avvio
 
 // ── HTTP ──────────────────────────────────────────────────────
 const server = http.createServer((req, res) => {
@@ -48,23 +49,26 @@ function buildOccupied() {
 }
 
 // ── Tournament State ──────────────────────────────────────────
-// phase: 'normal' | 'scheduled' | 'registration' | 'active' | 'ended'
+// phase: 'normal' | 'scheduled' | 'registration' | 'countdown' | 'active' | 'ended'
 //
 // FLUSSO:
 //  normal → (admin schedula) → scheduled
-//  scheduled → (30 min prima) → registration  [gioco normale continua, ci si iscrive]
-//  registration → (ora X) → active            [solo iscritti giocano, ≤1 = annullato]
-//  active → (fine / 0 giocatori) → ended
-//  ended → (15 min) → normal
+//  scheduled → (30 min prima) → registration  [gioco normale, auto-iscrizione]
+//  registration → (ora X) → countdown         [10s schermata drammatica]
+//  countdown → (10s) → active                 [solo iscritti, ≤1 = annullato]
+//  active → (fine / 1 sopravvissuto) → ended
+//  ended → (15 min) → normal                  [tutti tornano a giocare liberamente]
 let tournament = {
   phase: 'normal',
   mode: null,
   scheduledAt: 0,
   registrationAt: 0,
+  countdownEndsAt: 0,
   gameEndsAt: 0,
   winnerBoard: [],
   winnerBoardExpiresAt: 0,
   registeredIds: new Set(),
+  eliminationOrder: 0, // contatore per sapere chi è uscito prima
   _timers: []
 };
 
@@ -101,6 +105,7 @@ function createSnake(id, name) {
     alive: true, kills: 0, deaths: 0,
     respawnAt: 0, ws: null, score: 0,
     tournamentKills: 0, tournamentMaxLength: 3,
+    tournamentEliminationRank: 0, // 1 = primo eliminato (peggior posto)
     inTournamentWaitlist: false
   };
 }
@@ -113,6 +118,7 @@ function serializePlayer(p) {
     score: p.score, respawnAt: p.respawnAt,
     dir: p.dir, tournamentKills: p.tournamentKills,
     tournamentMaxLength: p.tournamentMaxLength,
+    tournamentEliminationRank: p.tournamentEliminationRank,
     inTournamentWaitlist: p.inTournamentWaitlist
   };
 }
@@ -123,6 +129,7 @@ function getTournamentInfo() {
     mode: tournament.mode,
     scheduledAt: tournament.scheduledAt,
     registrationAt: tournament.registrationAt,
+    countdownEndsAt: tournament.countdownEndsAt,
     gameEndsAt: tournament.gameEndsAt,
     winnerBoard: tournament.winnerBoard,
     winnerBoardExpiresAt: tournament.winnerBoardExpiresAt,
@@ -156,13 +163,12 @@ wss.on('connection', ws => {
         return;
       }
 
-      // Torneo ATTIVO: solo iscritti possono entrare, gli altri aspettano
-      if (tournament.phase === 'active') {
+      // Torneo ATTIVO o COUNTDOWN: solo iscritti possono entrare
+      if (tournament.phase === 'active' || tournament.phase === 'countdown') {
         ws.send(JSON.stringify({ type: 'join_rejected', reason: 'tournament_active' }));
         return;
       }
 
-      // In tutte le altre fasi (normal, scheduled, registration, ended) si può giocare
       const p = createSnake(id, name);
       p.ws = ws;
       players[id] = p;
@@ -171,7 +177,7 @@ wss.on('connection', ws => {
       if (tournament.phase === 'registration') {
         p.inTournamentWaitlist = true;
         tournament.registeredIds.add(id);
-        console.log(`[TORNEO] Auto-iscritto alla waitlist: ${name} (totale: ${tournament.registeredIds.size})`);
+        console.log(`[TORNEO] Auto-iscritto: ${name} (totale: ${tournament.registeredIds.size})`);
       }
 
       ws.send(JSON.stringify({
@@ -192,7 +198,7 @@ wss.on('connection', ws => {
       if (msg.code !== ADMIN_CODE) {
         ws.send(JSON.stringify({ type: 'admin_error', msg: 'Codice errato!' })); return;
       }
-      if (tournament.phase !== 'normal') {
+      if (tournament.phase !== 'normal' && tournament.phase !== 'ended') {
         ws.send(JSON.stringify({ type: 'admin_error', msg: 'Torneo già programmato o in corso!' })); return;
       }
       if (!['survival', 'length'].includes(msg.mode)) {
@@ -224,6 +230,11 @@ wss.on('connection', ws => {
 
   ws.on('close', () => {
     if (players[id]) {
+      // Se in torneo attivo survival: conta come eliminazione
+      if (tournament.phase === 'active' && tournament.mode === 'survival' && players[id].alive) {
+        tournament.eliminationOrder++;
+        players[id].tournamentEliminationRank = tournament.eliminationOrder;
+      }
       tournament.registeredIds.delete(id);
       delete players[id];
     }
@@ -245,10 +256,12 @@ function scheduleTournament(mode, scheduledAt) {
   tournament.mode = mode;
   tournament.scheduledAt = scheduledAt;
   tournament.registrationAt = scheduledAt - PRE_REGISTRATION_MS;
+  tournament.countdownEndsAt = 0;
   tournament.gameEndsAt = 0;
   tournament.winnerBoard = [];
   tournament.winnerBoardExpiresAt = 0;
   tournament.registeredIds = new Set();
+  tournament.eliminationOrder = 0;
 
   broadcast({ type: 'tournament_scheduled', tournament: getTournamentInfo() });
 
@@ -258,11 +271,10 @@ function scheduleTournament(mode, scheduledAt) {
   if (msToRegistration > 0) {
     addTimer(() => openRegistration(), msToRegistration);
   } else {
-    // Già nella finestra dei 30 min → apri registrazione subito
     setTimeout(() => openRegistration(), 100);
   }
 
-  addTimer(() => startTournamentActive(), msToStart);
+  addTimer(() => startCountdown(), msToStart);
   console.log(`[TORNEO] Programmato "${mode}" per ${new Date(scheduledAt).toLocaleString('it-IT')}`);
 }
 
@@ -272,17 +284,17 @@ function cancelTournament() {
   tournament.mode = null;
   tournament.scheduledAt = 0;
   tournament.registrationAt = 0;
+  tournament.countdownEndsAt = 0;
   tournament.winnerBoard = [];
   tournament.winnerBoardExpiresAt = 0;
   tournament.registeredIds = new Set();
+  tournament.eliminationOrder = 0;
   for (const p of Object.values(players)) p.inTournamentWaitlist = false;
   broadcast({ type: 'tournament_cancelled' });
   console.log('[TORNEO] Cancellato.');
 }
 
-// Apre la finestra di registrazione (30 min prima del torneo)
-// Il gioco normale continua — chi è dentro viene auto-iscritto,
-// chi entra ora viene iscritto automaticamente
+// Apre la finestra di registrazione (30 min prima)
 function openRegistration() {
   if (tournament.phase !== 'scheduled') return;
   tournament.phase = 'registration';
@@ -297,12 +309,13 @@ function openRegistration() {
   console.log(`[TORNEO] Registrazione aperta. Iscritti auto: ${tournament.registeredIds.size}`);
 }
 
-function startTournamentActive() {
+// Avvia il countdown di 10 secondi prima del torneo
+function startCountdown() {
   if (tournament.phase !== 'registration' && tournament.phase !== 'scheduled') return;
 
   const waitlisted = [...tournament.registeredIds];
 
-  // ≤1 iscritto → annullamento automatico, si torna al gioco normale
+  // ≤1 iscritto → annullamento automatico
   if (waitlisted.length <= 1) {
     console.log(`[TORNEO] Annullato: solo ${waitlisted.length} iscritto/i.`);
     broadcast({
@@ -314,10 +327,10 @@ function startTournamentActive() {
     return;
   }
 
-  tournament.phase = 'active';
-  tournament.gameEndsAt = tournament.mode === 'length' ? Date.now() + TOURNAMENT_DURATION_MS : 0;
+  tournament.phase = 'countdown';
+  tournament.countdownEndsAt = Date.now() + TOURNAMENT_COUNTDOWN_MS;
 
-  // Espelli chi NON era iscritto
+  // Espelli chi NON era iscritto durante il countdown
   for (const p of Object.values(players)) {
     if (!waitlisted.includes(p.id)) {
       if (p.ws && p.ws.readyState === 1) {
@@ -327,15 +340,30 @@ function startTournamentActive() {
     }
   }
 
-  // Reset campo e stats per gli iscritti
+  broadcast({ type: 'tournament_countdown', tournament: getTournamentInfo() });
+  console.log(`[TORNEO] Countdown 10s avviato! Iscritti: ${waitlisted.length}`);
+
+  addTimer(() => startTournamentActive(), TOURNAMENT_COUNTDOWN_MS);
+}
+
+function startTournamentActive() {
+  if (tournament.phase !== 'countdown') return;
+
+  tournament.phase = 'active';
+  tournament.eliminationOrder = 0;
+  tournament.gameEndsAt = tournament.mode === 'length' ? Date.now() + TOURNAMENT_DURATION_MS : 0;
+
+  // Reset campo e stats per tutti i rimasti
   food = [];
   spawnFood();
   for (const p of Object.values(players)) {
-    const head = randCell(pos => buildOccupied().has(`${pos.x},${pos.y}`));
+    const occ = buildOccupied();
+    const head = randCell(pos => occ.has(`${pos.x},${pos.y}`));
     p.body = [head, { x: head.x - 1, y: head.y }, { x: head.x - 2, y: head.y }];
     p.dir = { x: 1, y: 0 }; p.nextDir = { x: 1, y: 0 };
     p.alive = true; p.score = 0;
     p.tournamentKills = 0; p.tournamentMaxLength = 3;
+    p.tournamentEliminationRank = 0;
   }
 
   broadcast({ type: 'tournament_start', tournament: getTournamentInfo() });
@@ -351,14 +379,24 @@ function endTournament() {
   tournament.phase = 'ended';
 
   const all = Object.values(players);
+  const totalPlayers = all.length;
   let sorted;
+
   if (tournament.mode === 'survival') {
+    // Chi è ancora vivo → posizioni alte
+    // Chi è morto → ordinati per eliminationRank decrescente (rank alto = eliminato dopo = posizione migliore)
     sorted = [...all].sort((a, b) => {
+      // Entrambi vivi: per kills
+      if (a.alive && b.alive) return (b.tournamentKills || 0) - (a.tournamentKills || 0);
+      // a vivo, b morto: a prima
       if (a.alive && !b.alive) return -1;
+      // b vivo, a morto: b prima
       if (!a.alive && b.alive) return 1;
-      return (b.tournamentKills || 0) - (a.tournamentKills || 0);
+      // Entrambi morti: chi è stato eliminato dopo ha rank più alto (eliminationRank più grande = eliminato dopo = posizione migliore)
+      return (b.tournamentEliminationRank || 0) - (a.tournamentEliminationRank || 0);
     });
   } else {
+    // Lunghezza: più lungo = posizione migliore
     sorted = [...all].sort((a, b) => (b.tournamentMaxLength || 3) - (a.tournamentMaxLength || 3));
   }
 
@@ -368,7 +406,7 @@ function endTournament() {
     color: p.color,
     stat: tournament.mode === 'survival'
       ? `${p.tournamentKills || 0} kill`
-      : `${p.tournamentMaxLength || 3} cells`
+      : `${p.tournamentMaxLength || 3} celle`
   }));
   tournament.winnerBoardExpiresAt = Date.now() + WINNER_BOARD_MS;
 
@@ -384,7 +422,7 @@ function endTournament() {
 
   console.log(`[TORNEO] FINITO! Vincitore: ${winner ? winner.name : '???'}`);
 
-  // Reset a normale dopo 15 min
+  // Reset completo a normale dopo 15 min (WINNER_BOARD_MS)
   addTimer(() => resetToNormal(), WINNER_BOARD_MS);
 }
 
@@ -394,25 +432,29 @@ function resetToNormal() {
   tournament.mode = null;
   tournament.scheduledAt = 0;
   tournament.registrationAt = 0;
+  tournament.countdownEndsAt = 0;
   tournament.gameEndsAt = 0;
   tournament.winnerBoard = [];
   tournament.winnerBoardExpiresAt = 0;
   tournament.registeredIds = new Set();
+  tournament.eliminationOrder = 0;
 
-  // Tutti i connessi tornano al gioco classico
+  // Tutti i connessi tornano al gioco classico libero
+  food = [];
+  spawnFood();
   for (const p of Object.values(players)) {
-    const head = randCell(pos => buildOccupied().has(`${pos.x},${pos.y}`));
+    const occ = buildOccupied();
+    const head = randCell(pos => occ.has(`${pos.x},${pos.y}`));
     p.body = [head, { x: head.x - 1, y: head.y }, { x: head.x - 2, y: head.y }];
     p.dir = { x: 1, y: 0 }; p.nextDir = { x: 1, y: 0 };
     p.alive = true; p.kills = 0; p.deaths = 0; p.score = 0;
     p.tournamentKills = 0; p.tournamentMaxLength = 3;
+    p.tournamentEliminationRank = 0;
     p.inTournamentWaitlist = false;
   }
 
-  food = [];
-  spawnFood();
   broadcast({ type: 'tournament_reset' });
-  console.log('[TORNEO] Reset a gioco normale.');
+  console.log('[TORNEO] Reset a gioco normale — tutti possono giocare liberamente.');
 }
 
 // ── Broadcast ─────────────────────────────────────────────────
@@ -427,9 +469,16 @@ function broadcast(data) {
 setInterval(() => {
   const now = Date.now();
 
-  // scheduled / registration: gioco normale continua (players si muovono)
-  // ended: nessun movimento, solo broadcast per mostrare overlay
+  // ended: broadcast solo per mostrare overlay, nessun movimento
   if (tournament.phase === 'ended') {
+    if (Object.keys(players).length > 0) {
+      broadcast({ type: 'state', players: Object.values(players).map(serializePlayer), food, tournament: getTournamentInfo() });
+    }
+    return;
+  }
+
+  // countdown: gioco fermo, broadcast per mostrare schermata drammatica
+  if (tournament.phase === 'countdown') {
     if (Object.keys(players).length > 0) {
       broadcast({ type: 'state', players: Object.values(players).map(serializePlayer), food, tournament: getTournamentInfo() });
     }
@@ -447,7 +496,8 @@ setInterval(() => {
   for (const p of Object.values(players)) {
     if (!p.alive && now >= p.respawnAt) {
       if (tournament.phase === 'active' && tournament.mode === 'survival') continue;
-      const head = randCell(pos => buildOccupied().has(`${pos.x},${pos.y}`));
+      const occ = buildOccupied();
+      const head = randCell(pos => occ.has(`${pos.x},${pos.y}`));
       p.body = [head, { x: head.x - 1, y: head.y }, { x: head.x - 2, y: head.y }];
       p.dir = { x: 1, y: 0 }; p.nextDir = { x: 1, y: 0 };
       p.alive = true; p.score = 0;
@@ -467,30 +517,61 @@ setInterval(() => {
   }
 
   // Collisions
+  const toKill = new Set();
   for (const p of Object.values(players)) {
     if (!p.alive) continue;
     const nh = newHeads[p.id];
+
+    // Self collision
     for (let i = 0; i < p.body.length - 1; i++) {
-      if (cellEq(nh, p.body[i])) {
-        p.alive = false; p.deaths++; p.respawnAt = now + RESPAWN_MS; break;
-      }
+      if (cellEq(nh, p.body[i])) { toKill.add(p.id); break; }
     }
-    if (!p.alive) continue;
+    if (toKill.has(p.id)) continue;
+
+    // Other snakes
     for (const other of Object.values(players)) {
       if (other.id === p.id || !other.alive) continue;
+      // Colpisce il corpo dell'altro
       for (let i = 0; i < other.body.length; i++) {
         if (cellEq(nh, other.body[i])) {
-          p.alive = false; p.deaths++; p.respawnAt = now + RESPAWN_MS;
-          if (i === 0) { other.alive = false; other.deaths++; other.respawnAt = now + RESPAWN_MS; }
-          else { other.kills++; if (tournament.phase === 'active') other.tournamentKills++; }
+          toKill.add(p.id);
+          if (i === 0) toKill.add(other.id); // testa contro testa
+          else {
+            other.kills++;
+            if (tournament.phase === 'active') other.tournamentKills++;
+          }
           break;
         }
       }
-      if (!p.alive) break;
+      if (toKill.has(p.id)) break;
+      // Testa contro testa (stesso tick)
       if (newHeads[other.id] && cellEq(nh, newHeads[other.id])) {
-        p.alive = false; p.deaths++; p.respawnAt = now + RESPAWN_MS;
-        other.alive = false; other.deaths++; other.respawnAt = now + RESPAWN_MS;
+        toKill.add(p.id);
+        toKill.add(other.id);
       }
+    }
+  }
+
+  // Applica eliminazioni
+  // Tutti i morti dello stesso tick condividono lo stesso eliminationRank (pari merito)
+  const toKillArr = [...toKill].filter(killId => players[killId] && players[killId].alive);
+  if (toKillArr.length > 0 && tournament.phase === 'active' && tournament.mode === 'survival') {
+    // Un solo incremento per il gruppo: chi muore insieme ha lo stesso rank
+    tournament.eliminationOrder++;
+    const sharedRank = tournament.eliminationOrder;
+    for (const killId of toKillArr) {
+      const p = players[killId];
+      p.alive = false;
+      p.deaths++;
+      p.respawnAt = now + RESPAWN_MS;
+      p.tournamentEliminationRank = sharedRank;
+    }
+  } else {
+    for (const killId of toKillArr) {
+      const p = players[killId];
+      p.alive = false;
+      p.deaths++;
+      p.respawnAt = now + RESPAWN_MS;
     }
   }
 
@@ -498,6 +579,7 @@ setInterval(() => {
   for (const p of Object.values(players)) {
     if (!p.alive) continue;
     const nh = newHeads[p.id];
+    if (!nh) continue;
     p.body.unshift(nh);
     const fi = food.findIndex(f => cellEq(f, nh));
     if (fi !== -1) {
@@ -515,10 +597,12 @@ setInterval(() => {
 
   spawnFood();
 
-  // Survival end check
+  // Survival end check: rimasto ≤1 vivo
   if (tournament.phase === 'active' && tournament.mode === 'survival') {
+    const totalPlayers = Object.keys(players).length;
     const alive = Object.values(players).filter(p => p.alive);
-    if (Object.keys(players).length > 1 && alive.length <= 1) {
+    if (totalPlayers > 1 && alive.length <= 1) {
+      // Il sopravvissuto non ha un rank di eliminazione (è il vincitore)
       broadcast({ type: 'state', players: Object.values(players).map(serializePlayer), food, tournament: getTournamentInfo() });
       endTournament();
       return;
@@ -528,7 +612,8 @@ setInterval(() => {
   broadcast({
     type: 'state',
     players: Object.values(players).map(serializePlayer),
-    food, tournament: getTournamentInfo()
+    food,
+    tournament: getTournamentInfo()
   });
 
 }, TICK_MS);
